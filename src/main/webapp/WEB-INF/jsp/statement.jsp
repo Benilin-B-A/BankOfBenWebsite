@@ -16,14 +16,15 @@
 <body>
 
 	<jsp:include page="header.jsp" />
+	<jsp:include page="customerNav.jsp" />
 	<br>
 	<br>
 
 	<div>
 
-		<table>
+		<table class="table-format1">
 
-			<tr>
+			<tr class="font2 ">
 				<th>Transaction ID</th>
 				<th>Type</th>
 				<th>Amount</th>
@@ -34,18 +35,18 @@
 				<!-- <th>Description</th> -->
 			</tr>
 			
-		<%JSONArray transaction = (JSONArray) request.getAttribute("transactions"); 
-		for (int i=0; i<transaction.length(); i++){
-			JSONObject trans = (JSONObject) transaction.get(i);	
+		<%JSONArray statements = (JSONArray) request.getAttribute("statements"); 
+		for (int i=0; i<statements.length(); i++){
+			JSONObject statement = (JSONObject) statements.get(i);	
 		%>
 			<tr>
-				<td><%=trans.get("transactionId") %></td>
-				<td><%=trans.get("type") %></td>
-				<td><%=trans.get("amount") %></td>
-				<td><%=trans.get("transAccNum") %></td>
-				<td><%=TimeUtil.getDateTime(trans.getLong("time")) %></td>
-				<td><%=trans.get("openingBal") %></td>
-				<td><%=trans.get("closingBal") %></td>
+				<td><%=statement.get("transactionId") %></td>
+				<td><%=statement.get("type") %></td>
+				<td><%=statement.get("amount") %></td>
+				<td><%=statement.get("transAccNum") %></td>
+				<td><%=TimeUtil.getDateTime(statement.getLong("time")) %></td>
+				<td><%=statement.get("openingBal") %></td>
+				<td><%=statement.get("closingBal") %></td>
 				<%-- <td><%=trans.get("description") %></td> --%>
 			</tr>
 		

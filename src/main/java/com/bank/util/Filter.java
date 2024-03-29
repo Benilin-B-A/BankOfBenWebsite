@@ -16,7 +16,6 @@ public class Filter {
 //	}
 //
 //	public static void filterByType(JSONArray arr, String filterType) {
-//		System.out.println(arr);
 //		for(JSONObject obj : arr) {
 //			String type = ((JSONObject) obj).getString("Type");
 //			if (!type.equals(filterType)) {

@@ -22,6 +22,25 @@ input {
 	padding: 0 18px;
 }
 
+table {
+	border-collapse: separate;
+	border-spacing: 10px;
+}
+
+td {
+	text-align: left;
+}
+
+td:first-child {
+	width: 200px;
+}
+
+.table-format2{
+	border-collapse: separate;
+	border-spacing: 25px;
+}
+
+
 .errorMessage {
 	font-family: Inter, sans-serif;
 	color: #b30517;
@@ -58,12 +77,6 @@ input {
 	align-items: center;
 }
 
-.table1 {
-  border-collapse: separate;
-  border-spacing: 25px;
-}
-
-
 .title {
 	color: black;
 	text-align: center;
@@ -75,13 +88,13 @@ input {
 .titlePadding {
 	background: rgba(255, 255, 255, 0.5);
 	border-radius: 10px;
-	padding: 10px;
+	padding: 0px;
 	margin-bottom: 1%;
 }
 
 .navPadding {
-	background: rgba(179, 5, 23, 0.8);
-	padding: 10px;
+	background: #b30517;
+	padding: 5px;
 	border-radius: 10px;
 }
 
@@ -131,7 +144,7 @@ input {
 }
 
 .detailPadding {
-	background: rgba(179, 5, 23, 0.8);
+	background: #b30517;
 	padding: 10px;
 	border-radius: 15px;
 	margin-bottom: 30px;
@@ -162,22 +175,6 @@ input {
 	top: 0%;
 }
 
-.loginImageContainer {
-	position: relative;
-	width: 25%;
-	height: 50%;
-	left: 19%;
-}
-
-.loginFormContainer {
-	position: relative;
-	right: -22%;
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
-}
-
 .innerLoginFormContainer {
 	position: relative;
 	display: flex;
@@ -188,19 +185,7 @@ input {
 
 .loginFormPadding {
 	background: rgba(255, 255, 255, 0.5);
-	padding: 15px;
-	width: 30%;
 	border-radius: 15px;
-}
-
-.loginFormContainer>div {
-	margin-bottom: 20px;
-}
-
-.loginNavBarContainer {
-	display: flex;
-	flex-direction: row-reverse;
-	align-items: center;
 }
 
 /* Customer Styling */
@@ -211,13 +196,6 @@ input {
 	flex-direction: row;
 	align-items: center;
 	justify-content: space-between;
-}
-
-.profileIconContainer {
-	display: flex;
-	flex-direction: row;
-	justify-content: center;
-	align-items: center;
 }
 
 .infoPadding {
@@ -231,7 +209,23 @@ input {
 	display: flex;
 	width: 100vw;
 	align-items: center;
-	justify-content: space-evenly;
+	justify-content: space-between;
+}
+
+.columnBodyContainer {
+	display: flex;
+	flex-direction: column;
+	width: 99vw;
+	height: 30vw;
+	align-items: center;
+	justify-content: center;
+}
+
+.transactionContainer {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 55%;
 }
 
 .innerContainer {
@@ -242,31 +236,55 @@ input {
 	width: 50%;
 }
 
-.contentContainer {
-	justify-content: center;
-	display: flex;
-	flex-direction: column;
-	width: 50%;
-	margin-left: 5%;
-}
-
 .profileButtonContainer {
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	padding: 1px;
-	width: 100%;
 	border-radius: 10px;
-	margin-left: 10%;
 }
 
 /* customer acc styling */
+.accContainer {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: center;
+	width: 80%;
+}
 
+.individualAccContainer {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
 
-.accContainer{
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-    width: 45%;
+.table-format1 {
+	border-collapse: collapse;
+	width: 100%;
+	border-radius: 10px;
+	overflow: hidden;
+}
+
+.table-format1 th {
+	background-color: rgb(179, 5, 23, 0.8);
+	font-family: Inter, sans-serif;
+	text-align: center;
+	padding: 1%;
+	color: white;
+}
+
+.table-format1 td {
+	background-color: #f0f0f0;
+	font-family: Inter, sans-serif;
+	justify-content: center;
+	padding: 1%;
+	text-align: center;
+}
+
+.individualAccPadding {
+	background: rgb(198, 198, 198, 0.1);
+	padding: 20px;
+	width: 100%;
+	border-radius: 10px;
 }

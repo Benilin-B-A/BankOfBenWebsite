@@ -117,9 +117,9 @@ public class AccountsDBAgent implements AccountsAgent {
 				acc.setAccNum(set.getLong(2));
 				acc.setBalance(set.getLong(3));
 				acc.setType(AccountType.getTypeByValue(set.getInt(4)));
-				acc.setBranchId(set.getInt(5));
+				acc.setBranch(set.getString(5));
 				acc.setOpenedOn(set.getLong(6));
-				acc.setStatus(Status.getStatusByState(set.getInt(8)));
+				acc.setStatus(Status.getStatusByState(set.getInt(7)));
 				return acc;
 			}
 		} catch (SQLException exception) {

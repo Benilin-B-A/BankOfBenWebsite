@@ -1,8 +1,6 @@
 package servlet;
 
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -20,7 +18,6 @@ import com.bank.services.AdminServices;
 import com.bank.services.AuthServices;
 import com.bank.services.CustomerServices;
 import com.bank.services.EmployeeServices;
-import com.bank.util.LogHandler;
 
 public class Controller extends HttpServlet {
 
@@ -45,12 +42,11 @@ public class Controller extends HttpServlet {
 
 		// customer nav - profile
 		case "/profile":
-			CustomerServices customer = (CustomerServices) request.getSession().getAttribute("user");
+			CustomerServices customer = (CustomerServices) request.getSession(false).getAttribute("user");
 			try {
 				JSONObject cus = customer.getCustomerDetails();
 				request.setAttribute("customerDetails", cus);
-				request.setAttribute("tab", "profile");
-				request.getRequestDispatcher("/WEB-INF/jsp/customer.jsp").forward(request, response);
+				request.getRequestDispatcher("/WEB-INF/jsp/customerProfile.jsp").forward(request, response);
 			} catch (BankingException exception) {
 				//// handle-----------
 			}
@@ -58,47 +54,57 @@ public class Controller extends HttpServlet {
 
 		// customer nav - accounts
 		case "/accounts":
-			CustomerServices user = (CustomerServices) request.getSession().getAttribute("user");
+			CustomerServices customer1 = (CustomerServices) request.getSession(false).getAttribute("user");
 			try {
-				request.setAttribute("account", user.getAccount());
-				if (user.getAllAcc().size() > 1) {
-					request.setAttribute("otherAcc", user.getAccounts());
+				request.setAttribute("account", customer1.getAccount());
+				if (customer1.getAllAcc().size() > 1) {
+					request.setAttribute("otherAcc", customer1.getAccounts());
 				}
-				request.setAttribute("tab", "accounts");
-				request.getRequestDispatcher("/WEB-INF/jsp/customer.jsp").forward(request, response);
+				request.getRequestDispatcher("/WEB-INF/jsp/customerAccounts.jsp").forward(request, response);
 			} catch (BankingException exception) {
-				//handle--------------------------------
+				// handle--------------
 			}
 			break;
 
-		case "/transaction/withinBank":
-			CustomerServices cusServices = (CustomerServices) request.getSession().getAttribute("user");
+		// customer nav - transaction
+		case "/transaction":
+			CustomerServices cusServices = (CustomerServices) request.getSession(false).getAttribute("user");
 			boolean pinSet = cusServices.isPinSet();
 			if (pinSet) {
-				request.getRequestDispatcher("/WEB-INF/jsp/transaction.jsp").forward(request, response);
+				String tab = request.getParameter("transactionType");
+				if (tab == null || tab.equals("withinBank")) {
+					request.getRequestDispatcher("/WEB-INF/jsp/transaction.jsp").forward(request, response);
+				} else {
+					request.setAttribute("type", "outside");
+					request.getRequestDispatcher("/WEB-INF/jsp/transaction.jsp").forward(request, response);
+				}
 			} else {
 				request.getRequestDispatcher("/WEB-INF/jsp/setPin.jsp").forward(request, response);
 			}
 			break;
 
-		case "/transaction/outsideBank":
-			request.setAttribute("type", "outside");
-			request.getRequestDispatcher("/WEB-INF/jsp/transaction.jsp").forward(request, response);
-			break;
-
 		// customer nav - statement
 		case "/statement":
-			CustomerServices cuServices = (CustomerServices) request.getSession().getAttribute("user");
+			CustomerServices cuServices = (CustomerServices) request.getSession(false).getAttribute("user");
 			try {
-				JSONArray transactions = cuServices.getAccountStatement();
-				System.out.println(transactions);
-				request.setAttribute("transactions", transactions);
+				JSONArray statements = cuServices.getAccountStatement();
+				request.setAttribute("statements", statements);
 				request.getRequestDispatcher("/WEB-INF/jsp/statement.jsp").forward(request, response);
 			} catch (BankingException e) {
-
+				//handle-------------------------
 			}
 			break;
 
+		// make an account primary
+		case "/accounts/makePrimary":
+			CustomerServices cuServ = (CustomerServices) request.getSession(false).getAttribute("user");
+			try {
+				cuServ.switchAccount(Long.parseLong(request.getParameter("newAcc")));
+				response.sendRedirect(request.getContextPath() + "/app/accounts");
+			} catch (BankingException exception) {
+				// handle--------------------------------
+			}
+			break;
 		}
 	}
 
@@ -137,7 +143,7 @@ public class Controller extends HttpServlet {
 			} else if (userServices instanceof EmployeeServices) {
 
 			} else if (userServices instanceof CustomerServices) {
-				HttpSession session = request.getSession();
+				HttpSession session = request.getSession(true);
 				session.setAttribute("user", userServices);
 				response.sendRedirect(request.getContextPath() + "/app/accounts");
 			}
@@ -146,11 +152,14 @@ public class Controller extends HttpServlet {
 		case "/transaction/sendMoney":
 			try {
 				if (request.getParameter("type").equals("within")) {
+					sendMoney(request, true);
+					request.setAttribute("successMessage", "Transaction Successful");
+					request.getRequestDispatcher("/WEB-INF/jsp/transaction.jsp").forward(request, response);
+				} else {
 					sendMoney(request, false);
+					request.setAttribute("type", "outside");
 					request.getRequestDispatcher("/WEB-INF/jsp/transaction.jsp").forward(request, response);
 				}
-				sendMoney(request, true);
-				request.getRequestDispatcher("/WEB-INF/jsp/transaction.jsp").forward(request, response);
 			} catch (BankingException | InvalidInputException exception) {
 				request.setAttribute("error", exception.getMessage());
 				request.getRequestDispatcher("/WEB-INF/jsp/transaction.jsp").forward(request, response);
@@ -161,7 +170,7 @@ public class Controller extends HttpServlet {
 		case "/transaction/setTPIN":
 			String tPIN = request.getParameter("tPIN");
 			if (tPIN.equals(request.getParameter("confTPIN"))) {
-				CustomerServices cServices = (CustomerServices) request.getSession().getAttribute("user");
+				CustomerServices cServices = (CustomerServices) request.getSession(false).getAttribute("user");
 				try {
 					cServices.setPin(tPIN);
 					request.getRequestDispatcher("/WEB-INF/jsp/transaction.jsp").forward(request, response);
@@ -180,15 +189,15 @@ public class Controller extends HttpServlet {
 
 	private void sendMoney(HttpServletRequest request, boolean withinBank)
 			throws BankingException, InvalidInputException {
+		CustomerServices cusServices = (CustomerServices) request.getSession().getAttribute("user");
 		Transaction transaction = new Transaction();
-		transaction.setAccNumber(Long.parseLong(request.getParameter("accNumber")));
+		transaction.setTransAccNum(Long.parseLong(request.getParameter("accNumber")));
 		transaction.setAmount(Long.parseLong(request.getParameter("amount")));
 		transaction.setDescription(request.getParameter("description"));
 		String pin = request.getParameter("tpin");
-		if (withinBank) {
+		if (!withinBank) {
 			transaction.setiFSC(request.getParameter("iFSC"));
 		}
-		CustomerServices cusServices = (CustomerServices) request.getSession().getAttribute("user");
 		cusServices.transfer(transaction, pin, withinBank);
 	}
 

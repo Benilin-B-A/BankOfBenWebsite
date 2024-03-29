@@ -1,8 +1,8 @@
 package com.bank.enums;
 
 public enum AccountType {
-	Current(1),
-	Savings(2);
+	CURRENT(1),
+	SAVINGS(2);
 	
 	private int accType;
 	

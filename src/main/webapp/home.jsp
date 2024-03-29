@@ -31,29 +31,7 @@
 
 	<div class="detailPadding">
 
-		<p class="font1">BankOfBen, established in 2024, has swiftly
-			emerged as a cornerstone in the financial sector, prioritizing
-			customer-centric services and innovative solutions. With a commitment
-			to excellence, it offers a comprehensive range of banking products
-			tailored to meet diverse financial needs. Transparency and integrity
-			are at the core of BankOfBen's operations
-		</p>
-
-		<div class="container">
-			
-			<button class="button-1">Loans</button>
-			
-			<br> <br>
-			
-			<button class="button-1">Investments</button>
-			
-			<br> <br>
-			
-			<button class="button-1">Other Services</button>
-			
-			<br> <br>
-		
-		</div>
+		<p class="font1 titleContainer">TRUST AND TRANSPARENCY</p>
 	
 	</div>
 

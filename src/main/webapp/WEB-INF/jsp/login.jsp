@@ -13,43 +13,28 @@
 
 <body>
 	
-	<div class="titlePadding">
-		
-		<div class="title titleContainer">
-		
-			<img src="<%=request.getContextPath()%>/images/Logo.svg" alt="Logo" />
-		
-			<h1>Bank Of Ben</h1>
-		
-		</div>
+	<jsp:include page="header.jsp" />
 	
+	<div class="buttonContainer">
+		
+		<a href="/BankApp"><button class="button-2">Home</button></a>
+		
 	</div>
+	
+	<br><br><br><br><br>
+	
+	<div class="columnBodyContainer">
 
-	<div class="navPadding loginNavBarContainer">
-	
-		<a href="/BankApp/"><button class="button-1">Home</button></a>
-	
-	</div>
-
-	<div class="loginContainer">
-	
-		<div class="loginImageContainer">
-	
-			<img src="<%=request.getContextPath()%>/images/Login.svg" alt="Login" />
-	
-		</div>
-
-		<div class="loginFormPadding loginFormContainer">
+		<div class="transactionContainer loginFormPadding">
 		
-			<div>
+					<img src="<%=request.getContextPath()%>/images/Login.svg" alt="Login" />
 		
-				<h2>Login</h2><br />
-			
-			</div>
-
-			<form action="login" method="post">
-
+		
+				<form action="<%=request.getContextPath()%>/app/login" method="post">
+					
 				<div class="innerLoginFormContainer">
+				
+					<h2>Login</h2> <br><br>
 
 					<div>
 						
@@ -84,14 +69,16 @@
 						<button type="submit" class="button-2">Submit</button>
 					
 					</div>
-				
+					<br><br>
 				</div>
 			
 			</form>
-	
+			
 		</div>
-	
+			
+			
 	</div>
+	
 
 </body>
 

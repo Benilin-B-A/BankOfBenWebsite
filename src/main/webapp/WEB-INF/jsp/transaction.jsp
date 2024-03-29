@@ -5,7 +5,7 @@
 
 <head>
 
-<title>TransactionPage</title>
+<title>MoneyTransfer</title>
 <link rel="stylesheet"
 	href="<%=request.getContextPath()%>/css/style.css">
 
@@ -14,19 +14,34 @@
 <body>
 
 	<jsp:include page="header.jsp" />
+	
+	<jsp:include page="customerNav.jsp" />
+	
+	<br><br><br><br>
 
-	<div>
+	<div class="columnBodyContainer loginFormPadding">
 
-		<div>
-			<a href="withinBank"><button>Within Bank</button></a> <a
-				href="outsideBank"><button>To Other Bank</button></a>
+		<div class="profileButtonContainer">
+				
+				<form action="<%=request.getContextPath()%>/app/transaction" method="get">
+					<input type="hidden" name="transactionType" value="withinBank">
+					<button class="button-2">Within Bank</button>
+				</form>
+			
+				<form action="<%=request.getContextPath()%>/app/transaction" method="get">
+					<input type="hidden" name="transactionType" value="toOtherBank">
+					<button class="button-2">To Other Bank</button>
+				</form>
+				
 		</div>
 		<br> <br>
+			
+			<div class="transactionContainer">
+				<form action="sendMoney" method="post">
+				
+				<div class="innerLoginFormContainer">
 
-		<div>
-
-			<form action="sendMoney" method="post">
-				<div>
+					<div>
 					<input placeholder="Account Number" type="number" name="accNumber" />
 					<br> <br>
 				</div>
@@ -56,7 +71,7 @@
 
 
 				<div>
-					<input placeholder="description" type="text" name="description" />
+					<input placeholder="Description" type="text" name="description" />
 					<br> <br>
 				</div>
 
@@ -64,54 +79,23 @@
 					<input placeholder="T-PIN" type="password" name="tpin" /> <br>
 					<br>
 				</div>
-
-				<div>
-					<button type="submit">Send</button>
+					
+					<div>
+					
+						<button type="submit" class="button-2">Send</button>
+					
+					</div>
+				
 				</div>
-
+			
 			</form>
-
+			
+			<img src="<%=request.getContextPath()%>/images/Transaction.svg" alt="TransferMoney">
 		</div>
-
-		<%-- <%
-		} else if (request.getAttribute("type").equals("outside")) {
-		%>
-
-		<div>
-
-			<form action="sendMoneyOutside" method="post">
-
-				<div>
-					<input placeholder="Account Number" type="number" name="accNumber" /><br> <br>
-				</div>
-
-				<div>
-					<input placeholder="Amount" type="number" name="amount" /><br>
-					<br>
-				</div>
-
-				<div>
-					<label for="ifsc">IFSC </label> <input type="text" id="ifsc" /><br>
-					<br>
-				</div>
-
-				<div>
-					<input placeholder="description" type="text" name="description" /><br> <br>
-				</div>
-
-				<div>
-					<button type="submit">Send</button>
-				</div>
-
-			</form>
-
-
-		</div>
-
-		<%
-		}
-		%> --%>
+			
+			
 	</div>
+			
 
 </body>
 
