@@ -22,6 +22,22 @@ input {
 	padding: 0 18px;
 }
 
+select {
+	border: none;
+	outline: none;
+	font-family: Inter, sans-serif;
+	display: inline-block;
+	background-color: white;
+	height: 34px;
+	vertical-align: middle;
+	position: relative;
+	outline: 0;
+	border-radius: 15px;
+	box-sizing: border-box;
+	padding: 0 18px;
+	border: 1px solid white;
+}
+
 table {
 	border-collapse: separate;
 	border-spacing: 10px;
@@ -35,11 +51,10 @@ td:first-child {
 	width: 200px;
 }
 
-.table-format2{
+.table-format2 {
 	border-collapse: separate;
 	border-spacing: 25px;
 }
-
 
 .errorMessage {
 	font-family: Inter, sans-serif;
@@ -163,7 +178,7 @@ td:first-child {
 .buttonContainer {
 	display: flex;
 	flex-direction: row-reverse;
-	align-items: end;
+	align-items: center;
 }
 
 /* Login Page Styling */

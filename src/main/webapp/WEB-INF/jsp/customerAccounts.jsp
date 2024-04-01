@@ -57,12 +57,38 @@
 															
 					<tr>
 						<td class="font3">Account Type</td>
-						<td class="font2"><%=account.get("type")%></td>
+						<td class="font2">
+							<%
+							JSONObject typeObj = account.getJSONObject("type");
+							int type = typeObj.getInt("type");
+							if(type == 1){%>
+								Current
+								
+							<%} else{%>
+								Savings
+							
+							<%} %>
+								
+						</td>
 					</tr>
-															
+					
 					<tr>
-						<td class="font3">Account Status</td>
-						<td class="font2"><%=account.get("status")%></td>
+						<td class="font3">Status</td>
+						<td class="font2">
+							<%
+							JSONObject statusObj = account.getJSONObject("status");
+							int status = statusObj.getInt("state");
+							if(status == 1){%>
+								Active
+								
+							<%} else if(status ==2) {%>
+								Inactive
+							
+							<%} else{%>
+								Blocked
+							
+							<%} %>
+						</td>
 					</tr>
 														
 				</table>
@@ -77,8 +103,6 @@
 		
 	<div class="innerContainer">
 	
-		
-		
 		<div class="accContainer">
 		
 			<%if((request.getAttribute("otherAcc"))!=null) { 

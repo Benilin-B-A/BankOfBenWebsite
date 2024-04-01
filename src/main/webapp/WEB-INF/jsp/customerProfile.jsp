@@ -91,9 +91,9 @@
 				<img src="<%=request.getContextPath()%>/images/Bio.svg" alt="Bio">
 			
 			<div class="profileButtonContainer">
-				<a href="ChangePassword"><button class="button-2">Change Password</button></a> 
+				<a href="<%=request.getContextPath()%>/app/changePassword"><button class="button-2">Change Password</button></a> 
 					
-				<a href="ChangePin"><button class="button-2">Change TPIN</button></a>
+				<a href="<%=request.getContextPath()%>/app/changePin"><button class="button-2">Change TPIN</button></a>
 			</div>
 			</div>
 
