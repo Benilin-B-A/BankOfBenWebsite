@@ -6,7 +6,7 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.bank.custom.exceptions.BankingException;
+import com.bank.exceptions.BankingException;
 
 public class JSONAdapter {
 

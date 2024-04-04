@@ -7,11 +7,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import com.bank.custom.exceptions.PersistenceException;
 import com.bank.db.queries.AccountsTableQuery;
 import com.bank.db.queries.CustomerTableQuery;
 import com.bank.db.queries.EmployeeTableQuery;
 import com.bank.db.queries.UserTableQuery;
+import com.bank.exceptions.PersistenceException;
 import com.bank.interfaces.TransacAgent;
 import com.bank.pojo.Account;
 import com.bank.pojo.Customer;
@@ -87,9 +87,20 @@ public class TransacOperations implements TransacAgent {
 	}
 
 	@Override
-	public void addAccount(Account account) throws PersistenceException {
-		try (Connection connection = connect()) {
-			addAccount(connection, account);
+	public long addAccount(Account account) throws PersistenceException {
+		try (Connection connection = connect();
+				PreparedStatement st = 
+						connection.prepareStatement(AccountsTableQuery.addAccount,Statement.RETURN_GENERATED_KEYS)) {
+			st.setLong(1, account.getUId());
+			st.setInt(2, account.getType().getType());
+			st.setLong(3, account.getBranchId());
+			st.setBoolean(4, account.isPrimary());
+			st.setLong(5, System.currentTimeMillis());
+			st.execute();
+			try (ResultSet set = st.getGeneratedKeys()) {
+				set.next();
+				return set.getLong(1);
+			}
 		} catch (SQLException exception) {
 			throw new PersistenceException("Error in adding Account", exception);
 		}

@@ -12,25 +12,29 @@
 
 <head>
 
-<meta charset="UTF-8">
-<title>Accounts</title>
-<link rel="stylesheet" href="<%=request.getContextPath()%>/css/style.css">
+	<meta charset="UTF-8">
+
+	<title>Accounts</title>
+
+	<link rel="stylesheet" href="<%=request.getContextPath()%>/css/style.css">
 
 </head>
 
 <body>
 
+	<jsp:include page="popUpScript.jsp" />
+
 	<jsp:include page="header.jsp" />
 	
-	<jsp:include page="customerNav.jsp" /> <br> <br> <br> <br> <br> <br>
+	<jsp:include page="customerNav.jsp" /> <br> <br> <br>
 	
 	<div class="bodyContainer infoPadding">
 	
 		<div class="innerContainer">
 		
-		<div class="accContainer">
+			<div class="accContainer individualAccPadding">
 		
-				<%	
+				<%
 				JSONObject account=(JSONObject) request.getAttribute("account");
 				%>
 														
@@ -93,67 +97,84 @@
 														
 				</table>
 			
-			<br> <br>
+				<br> <br>
 		
-		</div>
-
-		</div>
-		
-	
-		
-	<div class="innerContainer">
-	
-		<div class="accContainer">
-		
-			<%if((request.getAttribute("otherAcc"))!=null) { 
-				JSONObject accs=(JSONObject) request.getAttribute("otherAcc"); 
-				Iterator<String> keys = accs.keys();
-			%>
-				
-			<p class="font2">Other Accounts</p>
-			
-			<%	while (keys.hasNext()) {
-					String key = keys.next();
-					JSONObject acc = (JSONObject) accs.get(key);
-			%>
-
-			<div class="individualAccContainer individualAccPadding">
-				
-				<table>
-
-					<tr>
-						<td class="font3">Account Number</td>
-						<td class="font2"><%=acc.get("accNum")%></td>
-					</tr>
-
-					<tr>
-						<td class="font3">Balance</td>
-						<td class="font2">Rs. <%=acc.get("balance")%></td>
-					</tr>
-
-				</table>
-
-				<form action="<%=request.getContextPath()%>/app/accounts/makePrimary" method="get">
-				 	<input type="hidden" name="newAcc" value="<%=acc.get("accNum")%>">
-					<button class="button-2" >Make Primary</button>
-				</form>
-				
 			</div>
-			<br><br>
-			<% } }
-			else{%>
-			<div class="innerContainer">
-			
-			</div>
-			
-			<%} %>	
 
 		</div>
 		
+		<div class="innerContainer">
+	
+			<div class="accContainer">
+		
+				<%if((request.getAttribute("otherAcc"))!=null) { 
+					JSONObject accs=(JSONObject) request.getAttribute("otherAcc"); 
+					Iterator<String> keys = accs.keys();
+				%>
+				
+				<p class="font2">Other Accounts</p>
+			
+				<%	while (keys.hasNext()) {
+						String key = keys.next();
+						JSONObject acc = (JSONObject) accs.get(key);
+				%>
+
+				<div class="individualAccContainer individualAccPadding">
+					
+					<table>
+
+						<tr>
+							<td class="font3">Account Number</td>
+							<td class="font2"><%=acc.get("accNum")%></td>
+						</tr>
+
+						<tr>
+							<td class="font3">Balance</td>
+							<td class="font2">Rs. <%=acc.get("balance")%></td>
+						</tr>
+
+					</table>
+
+					<form action="<%=request.getContextPath()%>/app/accounts/makePrimary" method="get">
+					 	<input type="hidden" name="newAcc" value="<%=acc.get("accNum")%>">
+						<button class="button-2" >Make Primary</button>
+					</form>
+				
+				</div>
+		
+				<br><br>
+			
+				<% } 
+				} else{%>
+				
+				<img src="<%=request.getContextPath()%>/images/CreateAccounts.svg" alt="CreateAccount" />
+				
+				<p class="font3">Create a new account by visiting your nearest BOB branch</p>
+			
+				<%	} %>	
+
+			</div>
+		
+		</div>
+	
 	</div>
 	
+	<%String msg = (String) request.getAttribute("successMessage");
+		if( msg != null) {%>
+				
+	<div class="messageContainer">
+		<p class="successMessage" id="msg"><%=msg%></p>
 	</div>
 	
+	<%}
+	String message = (String) request.getAttribute("errorMessage");
+		if( message != null) {%>
+				
+	<div class="messageContainer">
+		<p class="errorMessage" id="msg"><%=message%></p>
+	</div>
+	
+	<%}	%>
 	
 </body>
 

@@ -11,6 +11,10 @@ public class Transaction {
 	private String description;
 	private long customerId;
 
+	public String getDescription() {
+		return description;
+	}
+
 	public long getAccNumber() {
 		return accountNumber;
 	}
@@ -27,6 +31,22 @@ public class Transaction {
 		this.transactionAccountNumber = transAccNum;
 	}
 
+	public long getAccountNumber() {
+		return accountNumber;
+	}
+
+	public void setAccountNumber(long accountNumber) {
+		this.accountNumber = accountNumber;
+	}
+
+	public long getTransactionAccountNumber() {
+		return transactionAccountNumber;
+	}
+
+	public void setTransactionAccountNumber(long transactionAccountNumber) {
+		this.transactionAccountNumber = transactionAccountNumber;
+	}
+
 	public String getiFSC() {
 		return iFSC;
 	}
@@ -41,10 +61,6 @@ public class Transaction {
 
 	public void setAmount(long amount) {
 		this.amount = amount;
-	}
-
-	public String getDescription() {
-		return description;
 	}
 
 	public void setDescription(String descriptionString) {

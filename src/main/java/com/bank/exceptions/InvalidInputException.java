@@ -1,4 +1,4 @@
-package com.bank.custom.exceptions;
+package com.bank.exceptions;
 
 public class InvalidInputException extends Exception{
 

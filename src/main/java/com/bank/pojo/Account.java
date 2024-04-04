@@ -15,11 +15,10 @@ public class Account {
 	private long openedOn;
 	private boolean primary;
 	private String branch;
-
+	
 	public String getBranch() {
 		return this.branch;
 	}
-
 	public void setBranch(String branch) {
 		this.branch = branch;
 	}
@@ -93,8 +92,8 @@ public class Account {
 	}
 
 	public String toString() {
-		return ("Customer ID : " + this.userId + " | Account Number : " + this.accountNumber + " | Balance : "
-				+ this.balance + " | Branch ID : " + this.branchId + " | Opened On : "
-				+ TimeUtil.getDateTime(this.openedOn) + " | Status : " + this.status + " | Type : " + this.accounType);
+		return ("Customer ID : " + this.userId + " | Account Number : " + this.accountNumber + " | Balance : " + this.balance
+				+ " | Branch ID : " + this.branchId + " | Opened On : " + TimeUtil.getDateTime(this.openedOn)
+				+ " | Status : " + this.status + " | Type : " + this.accounType);
 	}
 }

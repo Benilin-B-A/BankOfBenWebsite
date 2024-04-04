@@ -1,6 +1,6 @@
 package com.bank.interfaces;
 
-import com.bank.custom.exceptions.BankingException;
+import com.bank.exceptions.BankingException;
 
 public interface CacheAgent {
 	

@@ -4,16 +4,14 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.bank.adapter.JSONAdapter;
 import com.bank.cache.AccountCache;
 import com.bank.cache.CustomerAccountsCache;
-import com.bank.custom.exceptions.BankingException;
-import com.bank.custom.exceptions.InvalidInputException;
-import com.bank.custom.exceptions.PersistenceException;
-import com.bank.custom.exceptions.PinNotSetException;
+import com.bank.exceptions.BankingException;
+import com.bank.exceptions.InvalidInputException;
+import com.bank.exceptions.PersistenceException;
 import com.bank.interfaces.AccountsAgent;
 import com.bank.interfaces.CustomerAgent;
 import com.bank.persistence.util.PersistenceObj;
@@ -28,6 +26,10 @@ public class CustomerServices {
 	private long userId;
 	private boolean isPinSet;
 	private Account currentAccount;
+	
+	public long getAccNum() {
+		return currentAccount.getAccNum();
+	}
 
 	static AccountCache accCache = AccountCache.getInstance();
 	static CustomerAccountsCache accsCache = CustomerAccountsCache.getInstance();
@@ -77,7 +79,7 @@ public class CustomerServices {
 	}
 
 	public void transfer(Transaction transaction, String pin, boolean withinBank)
-			throws BankingException, InvalidInputException {
+			throws BankingException{
 		AuthServices.authPin(userId, pin);
 		transaction.setAccNumber(currentAccount.getAccNum());
 		UserServices.transferMoney(transaction, withinBank);
@@ -87,7 +89,8 @@ public class CustomerServices {
 		UserServices.changePassword(userId, oldPass, newPass);
 	}
 
-	public void changePin(String oldPin, String newPin) throws BankingException, InvalidInputException {
+	public void changePin(String oldPin, String newPin)
+			throws BankingException, InvalidInputException {
 		AuthServices.authPin(userId, oldPin);
 		setPin(newPin);
 	}
@@ -103,11 +106,11 @@ public class CustomerServices {
 		}
 	}
 
-	public JSONArray getAccountStatement() throws BankingException {
+	public JSONObject getAccountStatement() throws BankingException {
 		return getAccountStatement(1);
 	}
 
-	public JSONArray getAccountStatement(int page) throws BankingException {
+	public JSONObject getAccountStatement(int page) throws BankingException {
 		return UserServices.getAccountStatement(currentAccount.getAccNum(), page);
 	}
 

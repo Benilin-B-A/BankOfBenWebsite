@@ -10,6 +10,11 @@ h2 {
 	font-family: Inter, sans-serif;
 }
 
+title{
+	font-family: Inter, sans-serif;
+	color:#2AAA8A;
+}
+
 input {
 	border: none;
 	outline: none;
@@ -20,6 +25,17 @@ input {
 	border-radius: 22px;
 	box-sizing: border-box;
 	padding: 0 18px;
+}
+
+input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button
+	{
+	-webkit-appearance: textfield;
+	margin: 0;
+}
+
+input[type="number"] {
+	appearance: textfield;
+	-moz-appearance: textfield;
 }
 
 select {
@@ -56,11 +72,6 @@ td:first-child {
 	border-spacing: 25px;
 }
 
-.errorMessage {
-	font-family: Inter, sans-serif;
-	color: #b30517;
-}
-
 .link {
 	text-decoration: none;
 }
@@ -83,6 +94,13 @@ td:first-child {
 	font-family: Inter, sans-serif;
 	color: black;
 	text-align: justify;
+}
+
+.font4 {
+	font-family: Inter, sans-serif;
+	color: black;
+	text-align: justify;
+	font-size:12px;
 }
 
 .titleContainer {
@@ -181,6 +199,13 @@ td:first-child {
 	align-items: center;
 }
 
+.messageContainer {
+	display: flex;
+	flex-direction: row-reverse;
+	align-items: center;
+	justify-content: center;
+}
+
 /* Login Page Styling */
 .loginContainer {
 	margin-top: 8%;
@@ -238,9 +263,9 @@ td:first-child {
 
 .transactionContainer {
 	display: flex;
-	justify-content: center;
-	align-items: center;
+	justify-content: center; align-items : center;
 	width: 55%;
+	align-items: center;
 }
 
 .innerContainer {
@@ -282,7 +307,7 @@ td:first-child {
 }
 
 .table-format1 th {
-	background-color: rgb(179, 5, 23, 0.8);
+	background-color: #b30517;
 	font-family: Inter, sans-serif;
 	text-align: center;
 	padding: 1%;
@@ -302,4 +327,30 @@ td:first-child {
 	padding: 20px;
 	width: 100%;
 	border-radius: 10px;
+}
+
+.successMessage {
+	/* position:fixed;
+	top:94%;
+	left: 45%; */
+	font-family: Inter, sans-serif;
+	font-weight: bold;
+	background-color: #4CBB17;
+	color: white;
+	padding: 10px 20px;
+	border-radius: 15px;
+	opacity: 0;
+}
+
+.errorMessage {
+	/* position:fixed;
+	top:90%;
+	left: 45%; */
+	font-family: Inter, sans-serif;
+	font-weight: bold;
+	background-color: #b30517;
+	color: white;
+	padding: 10px 20px;
+	border-radius: 15px;
+	opacity: 0;
 }

@@ -236,7 +236,7 @@
 								<%if((request.getSession().getAttribute("user")) instanceof AdminServices){ %>
 								<tr>
 									<td class="font3">Branch ID</td>
-									<td><input placeholder="" type="number" name="branchID" /></td> 
+									<td><input type="number" name="branchID" /></td> 
 								</tr>
 								
 								<%} %>

@@ -8,8 +8,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.bank.custom.exceptions.PersistenceException;
 import com.bank.db.queries.TransactionTableQuery;
+import com.bank.exceptions.PersistenceException;
 import com.bank.interfaces.TransactionAgent;
 import com.bank.pojo.Transaction;
 
@@ -44,7 +44,7 @@ public class TransactionDBAgent implements TransactionAgent {
 			st.setLong(7, System.currentTimeMillis());
 			st.setLong(8, trans.getOpeningBal());
 			st.setLong(9, trans.getClosingBal());
-			st.setString(10, trans.getDescription());
+//			st.setString(10, trans.getDescription());
 			st.executeUpdate();
 		} catch (SQLException exception) {
 			throw new PersistenceException("Error in transaction", exception);

@@ -6,9 +6,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.bank.custom.exceptions.PersistenceException;
 import com.bank.db.queries.UserTableQuery;
 import com.bank.enums.Status;
+import com.bank.exceptions.PersistenceException;
 import com.bank.interfaces.UserAgent;
 
 public class UserDBAgent implements UserAgent{

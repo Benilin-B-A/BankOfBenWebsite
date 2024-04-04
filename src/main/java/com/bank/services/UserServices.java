@@ -12,10 +12,10 @@ import com.bank.adapter.JSONAdapter;
 import com.bank.cache.AccountCache;
 import com.bank.cache.CustomerAccountsCache;
 import com.bank.cache.ProfileCache;
-import com.bank.custom.exceptions.BankingException;
-import com.bank.custom.exceptions.InvalidInputException;
-import com.bank.custom.exceptions.PersistenceException;
 import com.bank.enums.UserLevel;
+import com.bank.exceptions.BankingException;
+import com.bank.exceptions.InvalidInputException;
+import com.bank.exceptions.PersistenceException;
 import com.bank.interfaces.AccountsAgent;
 import com.bank.interfaces.EmployeeAgent;
 import com.bank.interfaces.TransacAgent;
@@ -129,7 +129,7 @@ public abstract class UserServices {
 			recepient.setCustomerId(getCustomerId(accNum));
 			recepient.setAccNumber(accNum);
 			recepient.setTransAccNum(senderAccNum);
-			recepient.setDescription(trans.getDescription());
+//			recepient.setDescription(trans.getDescription());
 			recepient.setAmount(trans.getAmount());
 			recepient.setTransactionId(tId);
 		}
@@ -168,18 +168,23 @@ public abstract class UserServices {
 	}
 	
 	static JSONObject getAccountDetails(long accNum) throws BankingException {
-		AuthServices.validateAccount(accNum);
+		AuthServices.validateAccountPresence(accNum);
 		Account acc = accCache.get(accNum);
 		return JSONAdapter.objToJSONObject(acc);
 	}
 
-	static JSONArray getAccountStatement(long accNum, int page) throws BankingException {
+	static JSONObject getAccountStatement(long accNum, int page) throws BankingException {
 		try {
 			AuthServices.validateAccount(accNum);
 			int limit = 10;
 			int offset = limit * (page - 1);
 			List<Transaction> list = tranAgent.getAccountStatement(accNum, limit, offset);
-			return JSONAdapter.transactionTOJson(list);
+			JSONArray transactionArray = JSONAdapter.transactionTOJson(list);
+			JSONObject transactionObj = new JSONObject();
+			transactionObj.put("transactionArray", transactionArray);
+			transactionObj.put("pages", Math.ceil(list.size()/10));
+			return transactionObj;
+			
 		} catch (PersistenceException exception) {
 			logger.log(Level.SEVERE, "Couldn't fetch account statement", exception);
 			throw new BankingException("Couldn't fetch account statement", exception);
@@ -245,14 +250,14 @@ public abstract class UserServices {
 		}
 	}
 
-	static void addAccount(Account account) throws BankingException {
+	static long addAccount(Account account) throws BankingException {
 		try {
 			Validator.checkNull(account);
 		} catch (InvalidInputException exception) {
 			throw new BankingException("Account is null");
 		}
 		try {
-			trAgnet.addAccount(account);
+			return trAgnet.addAccount(account);
 		} catch (PersistenceException exception) {
 			logger.log(Level.SEVERE, "Error in adding account", exception);
 			exception.printStackTrace();

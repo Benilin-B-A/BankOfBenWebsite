@@ -2,7 +2,7 @@ package com.bank.util;
 
 import java.util.regex.Pattern;
 
-import com.bank.custom.exceptions.InvalidInputException;
+import com.bank.exceptions.InvalidInputException;
 
 public class Validator {
 

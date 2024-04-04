@@ -8,4 +8,6 @@ public class BranchTableQuery {
 
 	public static String isBranchPresent = "select exists(select * from Branch where ID = ?)";
 
+	public static String getAllBranches = "select * from Branch";
+
 }

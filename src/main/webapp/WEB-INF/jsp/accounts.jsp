@@ -1,3 +1,6 @@
+<%@page import="com.bank.pojo.Branch"%>
+<%@page import="java.util.List"%>
+<%@page import="com.bank.util.TimeUtil"%>
 <%@page import="com.bank.services.AdminServices"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 
@@ -27,6 +30,8 @@
 		<jsp:include page="header.jsp" />
 		
 		<jsp:include page="employeeNav.jsp" />
+		
+		
 		<br>
 		
 	
@@ -45,22 +50,34 @@
 			
 		</div>
 		
-		<form action="<%=request.getContextPath()%>/app/accountDetails" method="get">
+		<%if((request.getSession().getAttribute("user"))instanceof AdminServices){ %>
+			<form action="<%=request.getContextPath()%>/app/accountDetails" method="get">
   			<label for="type" class="font3">Search By :</label>
  			 	<select name="type" id="searchType">
   				 	 <option value="accountNumber">Account Number</option>
-    				 <option value="CustomerID">Customer ID</option>	
+    				 <option value="customerID">Customer ID</option>	
  				 </select>
 			<input type="number" placeholder="CustomerID/AccountNum" name="value">
 			<button type="submit" class="button-2">View</button>
 		</form>
+		<% }else{%>
+		
+		<form action="<%=request.getContextPath()%>/app/accountDetails" method="get">
+			<input type="number" placeholder="Account Number" name="accountNumber">
+			<button type="submit" class="button-2">View</button>
+		</form>
+		
+		<%} %>
+		
 		
 	</div>
 
-	<br> <br> <br><br>
+	<br> <br>
 
 				<%
 				JSONObject account=(JSONObject) request.getAttribute("account");
+				JSONObject accounts=(JSONObject) request.getAttribute("allAccounts");
+				if (account != null){
 				%>
 				<div class="columnBodyContainer">
 
@@ -68,6 +85,12 @@
 	
 																
 				<table class="table-format2">
+				
+					<%if (account.getBoolean("primary")==true){ %>
+					<tr>
+						<td class="font2">Primary Account</td>
+					</tr>
+					<%} %>
 					
 					<tr>
 						<td class="font3">Account Number</td>
@@ -102,6 +125,11 @@
 					</tr>
 					
 					<tr>
+						<td class="font3">Opened On</td>
+						<td class="font2"><%=TimeUtil.getDateTime(account.getLong("openedOn"))%></td>
+					</tr>
+					
+					<tr>
 						<td class="font3">Status</td>
 						<td class="font2">
 							<%
@@ -123,9 +151,124 @@
 				</table>	
 	</div>
 	
+	<br>
+	
+	<%	
+							if(status == 1){%>
+								<form action="setAccStatus">
+									<input type="hidden" name="iD" value="<%=account.get("accNum")%>">
+									<input type="hidden" name="action" value="deactivate">
+									<button type="submit" class="button-2">Deactivate</button>
+								</form>
+							<%}else{%>
+								<form action="setAccStatus">
+									<input type="hidden" name="iD" value="<%=account.get("accNum")%>">
+									<input type="hidden" name="action" value="activate">
+									<button type="submit" class="button-2">Activate</button>
+								</form>
+							<%} %>	
+	
+	</div>
+	<%}else if(accounts !=null){ %>
+	
+	<h2 class="titleContainer">Customer ID : <%=request.getAttribute("customerID") %></h2>
+		
+	<%
+		Iterator<String> keys = accounts.keys();
+		while (keys.hasNext()) {
+			String key = keys.next();
+			JSONObject acc = (JSONObject) accounts.get(key);%>
+			
+			
+			<div class="columnBodyContainer">
+			
+				<div class="transactionContainer loginFormPadding">
+	
+																
+				<table class="table-format2">
+				
+					<%if (acc.getBoolean("primary")){ %>
+					<tr>
+						<td class="font2">Primary Account</td>
+					</tr>
+					<%} %>
+					
+					<tr>
+						<td class="font3">Account Number</td>
+						<td class="font2"><%=acc.get("accNum")%></td>
+					</tr>
+															
+					<tr>
+						<td class="font3">Balance</td>
+						<td class="font2">Rs. <%=acc.get("balance")%></td>
+					</tr>
+															
+					<tr>
+						<td class="font3">Branch</td>
+						<td class="font2"><%=acc.get("branch")%></td>
+					</tr>
+															
+					<tr>
+						<td class="font3">Account Type</td>
+						<td class="font2">
+							<%
+							JSONObject typeObj = acc.getJSONObject("type");
+							int type = typeObj.getInt("type");
+							if(type == 1){%>
+								Current
+								
+							<%} else{%>
+								Savings
+							
+							<%} %>
+								
+						</td>
+					</tr>
+					
+					<tr>
+						<td class="font3">Opened On</td>
+						<td class="font2"><%=TimeUtil.getDateTime(acc.getLong("openedOn"))%></td>
+					</tr>
+					
+					<tr>
+						<td class="font3">Status</td>
+						<td class="font2">
+							<%
+							JSONObject statusObj = acc.getJSONObject("status");
+							int status = statusObj.getInt("state");
+							if(status == 1){%>
+								Active
+							<%} else if(status ==2) {%>
+								Inactive
+							<%} else{%>
+								Blocked
+							<%} %>
+						</td>
+					</tr>
+														
+				</table>	
+	</div>
+	<br>
+	
+							<%	
+							if(status == 1){%>
+								<form action="setAccStatus">
+									<input type="hidden" name="iD" value="<%=acc.get("accNum")%>">
+									<input type="hidden" name="action" value="deactivate">
+									<button type="submit" class="button-2">Deactivate</button>
+								</form>
+							<%}else{%>
+								<form action="setAccStatus">
+									<input type="hidden" name="iD" value="<%=acc.get("accNum")%>">
+									<input type="hidden" name="action" value="activate">
+									<button type="submit" class="button-2">Activate</button>
+								</form>
+							<%} %>	
+	
 	</div>
 	
-	<%} else{ %>
+	
+	<%}} else{ %>
 	
 	<div class="columnBodyContainer">
 			<img src="<%=request.getContextPath()%>/images/SearchAccounts.svg" alt="customerDetails">
@@ -136,81 +279,63 @@
 	
 	} 
 	
-	else if (tab.equals("addCustomer")){%>
-	
-	<br><br>
-	
-			<div class="columnBodyContainer">
-
-				<div class="transactionContainer loginFormPadding">
+	else if (tab.equals("createAccount")){%>
+		<br><br>
+		
+		<div class="columnBodyContainer">
+		
+		<div class="transactionContainer loginFormPadding">
 						
-						<form action="addCustomer" class="innerLoginFormContainer" method="post">
+						<form action="createAccount" class="innerLoginFormContainer" method="post">
 						
 							<table class="table-format2">
 								
 								<tr>
-									<td class="font3" style="width:40%">Name</td>
-									<td class="font2" ><input placeholder="FirstName_LastName" type="text" name="name" /></td>
-
-									<td class="font3" >D.O.B</td>
-									<td class="font2" ><input placeholder="YYYY-MM-DD" type="date" name="dOB" /></td>
+									<td class="font3" style="width:40%">Customer ID</td>
+									<td class="font2" ><input type="number" name="customerID" /></td>
 								</tr>
 								
 								<tr>
-									<td class="font3">Phone</td>
-									<td class="font2"><input placeholder="xxxxxxxxxx" type="number" name="phone" /></td>
-
-									<td class="font3">E-Mail</td>
-									<td class="font2"><input placeholder="xxx@yyy.com" type="text" name="eMail" /></td>
-								</tr>
-															
-								<tr>
-									<td class="font3">Gender</td>
-									<td style="width:40%"><input type="radio" id="male" name="gender" value="Male">
-														<label for="male">Male</label>
-  													  <input type="radio" id="female" name="gender" value="Female">
-														<label for="female">Female</label>
-  													  <input type="radio" id="other" name="gender" value="Other">
-														<label for="other">Other</label>
-									</td>
-								</tr>
-								<tr>
-									<td class="font3">Address</td>
-									<td><input placeholder="Town, District, State, Pincode" type="text" name="address" /></td>
-								</tr>
-															
-								<tr>
-									<td class="font3">Aadhar Number</td>
-									<td class="font2"><input placeholder="xxxx xxxx xxxx" type="number" name="aadharNumber" /></td>
-
-									<td class="font3" style="width:40%">Pan Number</td>
-									<td class="font2" style="width:40%"><input placeholder="XXXXXYYYY" type="text" name="panNumber" /></td>
-								</tr>
-															
-								<tr>
 									<td class="font3">Account Type</td>
-									<td><input type="radio" id="current" name="accountType" value="Current">
+									<td style="width:40%"><input type="radio" id="current" name="accType" value="Current">
 														<label for="current">Current</label>
-  													  <input type="radio" id="savings" name="accountType" value="Savings">
+  													  <input type="radio" id="savings" name="accType" value="Savings">
 														<label for="savings">Savings</label>
 									</td>
 								</tr>
-								
-								<%if((request.getSession().getAttribute("user")) instanceof AdminServices){ %>
+								<%if(request.getSession().getAttribute("user") instanceof AdminServices){ %>
 								<tr>
-									<td class="font3">Branch ID</td>
-									<td><input placeholder="" type="number" name="branchID" /></td> 
-								</tr>
+								<td>Branch</td>
+								<td>
 								
-								<%} %>
+									<select name="branchId">
+									
+									<%List<Branch> list = (List<Branch>) request.getAttribute("branches");
+									for(Branch branch : list){%>
+  				 	 					<option value="<%=branch.getId()%>"><%=branch.getBranchName()%></option>
+    									 <%} %>
+ 									 </select>
+								</td>
+									
+								</tr>
+								<%}%>
 								
 							</table>
 							
 							<button type="submit" class="button-2">Submit</button>
 							
+							<br><br>
+							
 						</form>
 				</div>		
-	</div>
+				<br><br>
+					<a href="<%=request.getContextPath()%>/app/accountDetails" class="link font1">
+						<button class="button-2">Cancel</button>
+					</a>
+		</div>
+	
+
+				
 	<%} %>
 									
 </body>

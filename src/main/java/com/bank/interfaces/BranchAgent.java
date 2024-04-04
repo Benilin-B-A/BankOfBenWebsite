@@ -1,6 +1,8 @@
 package com.bank.interfaces;
 
-import com.bank.custom.exceptions.PersistenceException;
+import java.util.List;
+
+import com.bank.exceptions.PersistenceException;
 import com.bank.pojo.Branch;
 
 public interface BranchAgent {
@@ -10,5 +12,7 @@ public interface BranchAgent {
 	boolean isIFSCPresent(String iFSC) throws PersistenceException;
 
 	boolean isBranchIdPresent(long branchID) throws PersistenceException;
+
+	List<Branch> getBranches() throws PersistenceException;
 
 }

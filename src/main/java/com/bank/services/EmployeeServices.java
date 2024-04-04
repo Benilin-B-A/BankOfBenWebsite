@@ -6,9 +6,9 @@ import java.util.logging.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.bank.custom.exceptions.BankingException;
-import com.bank.custom.exceptions.PersistenceException;
 import com.bank.enums.Status;
+import com.bank.exceptions.BankingException;
+import com.bank.exceptions.PersistenceException;
 import com.bank.interfaces.AccountsAgent;
 import com.bank.interfaces.EmployeeAgent;
 import com.bank.interfaces.TransactionAgent;
@@ -77,11 +77,11 @@ public class EmployeeServices {
 		UserServices.changePassword(userId, oldPass, newPass);
 	}
 
-	public JSONArray getAccountStatement(long accNum) throws BankingException {
+	public JSONObject getAccountStatement(long accNum) throws BankingException {
 		return getAccountStatement(accNum, 1);
 	}
 
-	public JSONArray getAccountStatement(long accNum, int page) throws BankingException {
+	public JSONObject getAccountStatement(long accNum, int page) throws BankingException {
 		validateEmpAccess(accNum);
 		return UserServices.getAccountStatement(accNum, page);
 	}
@@ -109,9 +109,9 @@ public class EmployeeServices {
 		return UserServices.addCustomer(cus, acc);
 	}
 
-	public void addAccount(Account acc) throws BankingException {
+	public long addAccount(Account acc) throws BankingException {
 		acc.setBranchId(branchId);
-		UserServices.addAccount(acc);
+		return UserServices.addAccount(acc);
 	}
 
 	public void setAccountStatus(long accNum, Status status) throws BankingException {
@@ -128,6 +128,10 @@ public class EmployeeServices {
 		return UserServices.getCustomerDetails(cusId);
 	}
 
+	public JSONObject getEmployeeDetails() throws BankingException {
+		return getEmployeeDetails(userId);
+	}
+	
 	public JSONObject getEmployeeDetails(long empId) throws BankingException {
 		return UserServices.getEmployeeDetails(empId);
 	}

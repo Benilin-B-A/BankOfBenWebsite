@@ -1,6 +1,6 @@
 package com.bank.interfaces;
 
-import com.bank.custom.exceptions.PersistenceException;
+import com.bank.exceptions.PersistenceException;
 import com.bank.pojo.Employee;
 
 public interface EmployeeAgent {

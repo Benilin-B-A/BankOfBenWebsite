@@ -2,7 +2,7 @@ package com.bank.interfaces;
 
 import java.util.List;
 
-import com.bank.custom.exceptions.PersistenceException;
+import com.bank.exceptions.PersistenceException;
 import com.bank.pojo.Transaction;
 
 public interface TransactionAgent {

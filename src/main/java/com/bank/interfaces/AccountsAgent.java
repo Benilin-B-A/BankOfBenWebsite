@@ -3,8 +3,8 @@ package com.bank.interfaces;
 import java.util.List;
 import java.util.Map;
 
-import com.bank.custom.exceptions.PersistenceException;
 import com.bank.enums.Status;
+import com.bank.exceptions.PersistenceException;
 import com.bank.pojo.Account;
 
 public interface AccountsAgent {

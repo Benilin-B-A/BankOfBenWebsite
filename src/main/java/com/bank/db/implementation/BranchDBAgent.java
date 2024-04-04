@@ -5,9 +5,11 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
-import com.bank.custom.exceptions.PersistenceException;
 import com.bank.db.queries.BranchTableQuery;
+import com.bank.exceptions.PersistenceException;
 import com.bank.interfaces.BranchAgent;
 import com.bank.pojo.Branch;
 
@@ -65,6 +67,25 @@ public class BranchDBAgent implements BranchAgent{
 			try(ResultSet set = st.executeQuery()){
 				set.next();
 				return set.getBoolean(1);
+			}
+		} catch (SQLException exception) {
+			throw new PersistenceException("Couldn't add Branch", exception);
+		}
+	}
+
+	@Override
+	public List<Branch> getBranches() throws PersistenceException {
+		try (Connection connection = connect();
+				PreparedStatement st = connection.prepareStatement(BranchTableQuery.getAllBranches)) {
+			List<Branch> branches = new ArrayList<>();
+			try(ResultSet set = st.executeQuery()){
+				while (set.next()) {
+					Branch branch = new Branch();
+					branch.setBranchName(set.getString(1));
+					branch.setId(set.getLong(2));
+					branches.add(branch);
+				}
+				return branches;
 			}
 		} catch (SQLException exception) {
 			throw new PersistenceException("Couldn't add Branch", exception);

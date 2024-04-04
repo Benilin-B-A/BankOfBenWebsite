@@ -1,45 +1,91 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-	pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+
 <!DOCTYPE html>
+
 <html>
+
 <head>
-<meta charset="UTF-8">
-<link rel="stylesheet"
-	href="<%=request.getContextPath()%>/css/style.css" />
-<title>Insert title here</title>
+	
+	<meta charset="UTF-8">
+
+	<link rel="stylesheet" href="<%=request.getContextPath()%>/css/style.css" />
+
+	<title>Insert title here</title>
+
 </head>
+
 <body>
+
+	<jsp:include page="popUpScript.jsp" />
+	
 	<jsp:include page="header.jsp" />
+	
+	<div class="buttonContainer">
+		
+		<a href="<%=request.getContextPath()%>/app/accounts"><button class="button-2">Cancel</button></a>
+		
+	</div>
 
 	<div>
-		<h3>SET TPIN</h3>
+	
 		<br> <br>
 
-		<div>
-			<p>Set T-PIN to complete your first transaction</p>
-			<form action="setTPIN" method="post">
-				<div>
-					<input placeholder="NEW T-PIN" type="password" name="tPIN" />
-					<br> <br>
-				</div>
+		<div class="columnBodyContainer">
 
-				<div>
-					<input placeholder="CONFIRM NEW T-PIN" type="password" name="confTPIN" /> <br>
+		<div class="transactionContainer loginFormPadding">
+		
+			<img src="<%=request.getContextPath()%>/images/SetPin.svg" alt="setPin" />		
+				
+			<div>
+					
+				<h2>SET T-PIN</h2>
+				
+				<p class="font3">You're one step away from making your first transaction</p>
+				
+				<form action="<%=request.getContextPath()%>/app/setPin" method="post">
+
+					<div>
+						<input placeholder="New T-PIN" type="password" name="newPin" required
+								min=1 step=1 max=9999/> 
+						<br><br>
+					</div>
+					
+					<div>
+						<input placeholder="Re-Enter New T-PIN"  type="password" name="reNewPin" required
+								min=1 step=1 max=9999/> 
+						<br>
+					</div>
+					
+					<p class="font4">
+						Pin must be a 4 digit number
+					</p>
+					
 					<br>
-				</div>
 
-				<div>
-					<button type="submit">CONFIRM</button>
-				</div>
-
-			</form>
+					<button type="submit" class="button-2">CONFIRM</button>
+					
+					<br><br>
+				
+				</form>
 			
-			<%String errorMessage = (String) request.getAttribute("error");
-			if(errorMessage!=null){%>
-			<p><%=errorMessage%></p>
-			<%} %>
-
+			</div>
+		
 		</div>
+		
 	</div>
+	
+	</div>
+	
+	<%
+	String message = (String) request.getAttribute("errorMessage");
+		if( message != null) {%>
+				
+	<div class="messageContainer">
+		<p class="errorMessage" id="msg"><%=message%></p>
+	</div>
+	
+	<%}	%>
+
 </body>
+
 </html>

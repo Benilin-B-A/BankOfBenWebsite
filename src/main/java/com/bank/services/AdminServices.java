@@ -1,16 +1,17 @@
 package com.bank.services;
 
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.bank.custom.exceptions.BankingException;
-import com.bank.custom.exceptions.InvalidInputException;
-import com.bank.custom.exceptions.PersistenceException;
 import com.bank.enums.Status;
 import com.bank.enums.UserLevel;
+import com.bank.exceptions.BankingException;
+import com.bank.exceptions.InvalidInputException;
+import com.bank.exceptions.PersistenceException;
 import com.bank.interfaces.BranchAgent;
 import com.bank.interfaces.TransacAgent;
 import com.bank.persistence.util.PersistenceObj;
@@ -61,11 +62,11 @@ public class AdminServices {
 		UserServices.changePassword(userId, oldPass, newPass);
 	}
 
-	public JSONArray getAccountStatement(long accNum) throws BankingException {
+	public JSONObject getAccountStatement(long accNum) throws BankingException {
 		return getAccountStatement(accNum, 1);
 	}
 	
-	public JSONArray getAccountStatement(long accNum, int page) throws BankingException {
+	public JSONObject getAccountStatement(long accNum, int page) throws BankingException {
 		return UserServices.getAccountStatement(accNum, page);
 
 	}
@@ -75,7 +76,7 @@ public class AdminServices {
 	}
 
 	public JSONObject getAccount(long accNum) throws BankingException{
-		AuthServices.validateAccount(accNum);
+		AuthServices.validateAccountPresence(accNum);
 		return UserServices.getAccountDetails(accNum);
 	}
 
@@ -109,10 +110,10 @@ public class AdminServices {
 		}
 	}
 
-	public void addAccount(Account account, long branchId) throws BankingException {
+	public long addAccount(Account account, long branchId) throws BankingException {
 		isBranchPresent(branchId);
 		account.setBranchId(branchId);
-		UserServices.addAccount(account);
+		return UserServices.addAccount(account);
 	}
 
 	public long addCustomer(Customer cus, Account acc, long branchId) throws BankingException {
@@ -148,6 +149,15 @@ public class AdminServices {
 		AuthServices.validateAccountPresence(accNum);
 		AuthServices.setAccountStatus(accNum, status);
 	}
+	
+	public List<Branch> getBranches() throws BankingException{
+		try {
+			return branchAgent.getBranches();
+		} catch (PersistenceException exception) {
+			logger.log(Level.SEVERE,"Error in fetching branch details", exception);
+			throw new BankingException("Couldn't fetch branch details");
+		}
+	}
 
 	public void closeAcc(long accNum) throws BankingException {
 		AuthServices.validateAccountPresence(accNum);
@@ -158,6 +168,10 @@ public class AdminServices {
 		return UserServices.getCustomerDetails(cusId);
 	}
 
+	public JSONObject getEmployeeDetails() throws BankingException{
+		return getEmployeeDetails(userId);
+	}
+	
 	public JSONObject getEmployeeDetails(long empId) throws BankingException{
 		return UserServices.getEmployeeDetails(empId);
 	}

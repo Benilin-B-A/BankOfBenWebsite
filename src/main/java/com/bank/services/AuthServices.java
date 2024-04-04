@@ -6,9 +6,9 @@ import java.util.logging.Logger;
 import org.mindrot.jbcrypt.BCrypt;
 
 import com.bank.cache.AccountCache;
-import com.bank.custom.exceptions.BankingException;
-import com.bank.custom.exceptions.PersistenceException;
 import com.bank.enums.Status;
+import com.bank.exceptions.BankingException;
+import com.bank.exceptions.PersistenceException;
 import com.bank.interfaces.AccountsAgent;
 import com.bank.interfaces.CustomerAgent;
 import com.bank.interfaces.EmployeeAgent;
@@ -37,11 +37,11 @@ public class AuthServices {
 				}
 				setAttempt(uId, attempt + 1);
 				logger.warning("Incorrect login attempt on user id : " + uId);
-				throw new BankingException("*Invalid LoginID or Password");
+				throw new BankingException("Invalid LoginID or Password");
 			}
 			setStatus(uId, Status.BLOCKED);
 			logger.warning("User id : " + uId + "blocked exceeding login attempt limit");
-			throw new BankingException("User Blocked : Contact BOB authority");
+			throw new BankingException("User blocked for exceeding login attempts : Contact BOB authority");
 		} catch (PersistenceException exception) {
 			logger.log(Level.SEVERE, "Login error", exception);
 			throw new BankingException("Login Error : Try Again Later");
@@ -141,6 +141,7 @@ public class AuthServices {
 				throw new BankingException("User already " + state);
 			}
 			accAgent.setAccStatus(accNum, status);
+			accCache.remove(accNum);
 		} catch (PersistenceException exception) {
 			logger.log(Level.SEVERE, "Error in setting account status", exception);
 			throw new BankingException("Status Update Error", exception);
@@ -198,7 +199,7 @@ public class AuthServices {
 		}
 	}
 
-	public static Object getServiceObj(long userId) throws BankingException {
+	public Object getServiceObj(long userId) throws BankingException {
 		try {
 			int type = userAgent.getUserLevel(userId);
 			if (type == 1) {

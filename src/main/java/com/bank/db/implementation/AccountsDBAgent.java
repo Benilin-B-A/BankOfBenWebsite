@@ -10,10 +10,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.bank.custom.exceptions.PersistenceException;
 import com.bank.db.queries.AccountsTableQuery;
 import com.bank.enums.AccountType;
 import com.bank.enums.Status;
+import com.bank.exceptions.PersistenceException;
 import com.bank.interfaces.AccountsAgent;
 import com.bank.pojo.Account;
 

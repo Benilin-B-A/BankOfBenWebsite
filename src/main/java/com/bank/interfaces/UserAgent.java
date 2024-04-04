@@ -1,7 +1,7 @@
 package com.bank.interfaces;
 
-import com.bank.custom.exceptions.PersistenceException;
 import com.bank.enums.Status;
+import com.bank.exceptions.PersistenceException;
 
 public interface UserAgent {
 
