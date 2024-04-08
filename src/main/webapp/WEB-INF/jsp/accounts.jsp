@@ -1,3 +1,4 @@
+<%@page import="com.bank.services.EmployeeServices"%>
 <%@page import="com.bank.pojo.Branch"%>
 <%@page import="java.util.List"%>
 <%@page import="com.bank.util.TimeUtil"%>
@@ -27,11 +28,21 @@
 <body>
 
 		
+			<%Object user = request.getSession().getAttribute("user");%>
+		
 		<jsp:include page="header.jsp" />
 		
+		<%if (user instanceof EmployeeServices){ %>
+	
 		<jsp:include page="employeeNav.jsp" />
+	
+	<%} else{%>
+	
+		<jsp:include page="adminNav.jsp" />
+	
+	<%}%>
 		
-		
+		<jsp:include page="popUpScript.jsp" />
 		<br>
 		
 	
@@ -40,7 +51,7 @@
 	if(tab.equals("viewAccount")){ %>
 		
 		
-		<div class="customerNavBarContainer">
+		<div class="searchBoxContainer">
 		
 		<div>
 			
@@ -57,7 +68,8 @@
   				 	 <option value="accountNumber">Account Number</option>
     				 <option value="customerID">Customer ID</option>	
  				 </select>
-			<input type="number" placeholder="CustomerID/AccountNum" name="value">
+			<input type="text" placeholder="CustomerID/AccountNum" name="value" pattern="^[0-9]+$" 
+				title="Enter a valid input" required>
 			<button type="submit" class="button-2">View</button>
 		</form>
 		<% }else{%>
@@ -71,8 +83,6 @@
 		
 		
 	</div>
-
-	<br> <br>
 
 				<%
 				JSONObject account=(JSONObject) request.getAttribute("account");
@@ -171,7 +181,13 @@
 	</div>
 	<%}else if(accounts !=null){ %>
 	
-	<h2 class="titleContainer">Customer ID : <%=request.getAttribute("customerID") %></h2>
+	<div class="container">
+	
+		<h2 >Customer ID : <%=request.getAttribute("customerID")%></h2>
+	
+		<p class="font2"> No. Of Accounts : <%=accounts.length()%></p>
+	
+	</div>
 		
 	<%
 		Iterator<String> keys = accounts.keys();
@@ -270,6 +286,8 @@
 	
 	<%}} else{ %>
 	
+	<br><br><br><br>
+	
 	<div class="columnBodyContainer">
 			<img src="<%=request.getContextPath()%>/images/SearchAccounts.svg" alt="customerDetails">
 			<p class="font2">Search to view account details</p>
@@ -336,7 +354,23 @@
 	
 
 				
-	<%} %>
+	<%}
+	String msg = (String) request.getAttribute("successMessage");
+		if( msg != null) {%>
+				
+	<div class="messageContainer">
+		<p class="successMessage" id="msg"><%=msg%></p>
+	</div>
+	
+	<%}
+	String message = (String) request.getAttribute("errorMessage");
+		if( message != null) {%>
+				
+	<div class="messageContainer">
+		<p class="errorMessage" id="msg"><%=message%></p>
+	</div>
+	
+	<%}	%>
 									
 </body>
 

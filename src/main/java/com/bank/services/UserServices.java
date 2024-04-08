@@ -1,11 +1,9 @@
 package com.bank.services;
 
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.bank.adapter.JSONAdapter;
@@ -129,7 +127,7 @@ public abstract class UserServices {
 			recepient.setCustomerId(getCustomerId(accNum));
 			recepient.setAccNumber(accNum);
 			recepient.setTransAccNum(senderAccNum);
-//			recepient.setDescription(trans.getDescription());
+			recepient.setDescription(trans.getDescription());
 			recepient.setAmount(trans.getAmount());
 			recepient.setTransactionId(tId);
 		}
@@ -178,23 +176,16 @@ public abstract class UserServices {
 			AuthServices.validateAccount(accNum);
 			int limit = 10;
 			int offset = limit * (page - 1);
-			List<Transaction> list = tranAgent.getAccountStatement(accNum, limit, offset);
-			JSONArray transactionArray = JSONAdapter.transactionTOJson(list);
-			JSONObject transactionObj = new JSONObject();
-			transactionObj.put("transactionArray", transactionArray);
-			transactionObj.put("pages", Math.ceil(list.size()/10));
-			return transactionObj;
-			
+			return tranAgent.getAccountStatement(accNum, limit, offset);
 		} catch (PersistenceException exception) {
 			logger.log(Level.SEVERE, "Couldn't fetch account statement", exception);
 			throw new BankingException("Couldn't fetch account statement", exception);
 		}
 	}
 
-	public static JSONArray getTransStatement(long transId) throws BankingException {
+	public static JSONObject getTransStatement(long transId) throws BankingException {
 		try {
-			List<Transaction> list = tranAgent.getTransactionStatement(transId);
-			return JSONAdapter.transactionTOJson(list);
+			return tranAgent.getTransactionStatement(transId);
 		} catch (PersistenceException exception) {
 			logger.log(Level.SEVERE, "Couldn't fetch transaction statement", exception);
 			throw new BankingException("Couldn't fetch transaction statement", exception);

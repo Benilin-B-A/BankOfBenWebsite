@@ -1,3 +1,5 @@
+<%@page import="com.bank.services.EmployeeServices"%>
+<%@page import="com.bank.pojo.Employee"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 
 <%@ page import="com.bank.enums.AccountType"%>
@@ -31,8 +33,19 @@
 		
 		<jsp:include page="header.jsp" />
 		
+		<%Object userObj = request.getSession().getAttribute("user");
+	if (userObj instanceof CustomerServices){%>
+	
 		<jsp:include page="customerNav.jsp" />
 	
+	<%}else if(userObj instanceof EmployeeServices){ %>
+	
+		<jsp:include page="employeeNav.jsp" />
+	
+	<%}else{%>
+		<jsp:include page="adminNav.jsp" />
+	
+	<%} %>
 	</div>  
 	
 	<br><br><br><br>
@@ -74,7 +87,16 @@
 															
 				<tr>
 					<td class="font3">Address</td>
-					<td class="font2"><%=profile.get("address")%></td>
+					<td class="font2">
+					<%
+					String address = (String) profile.get("address");
+					String[] addressArr = address.split(",");
+					for(String str : addressArr){%>
+						<%=str%>
+					<br><br>			
+					<%}
+					%>
+					</td>
 				</tr>
 				
 				<%if (obj instanceof CustomerServices) {%>
@@ -98,7 +120,7 @@
 
 					<tr>
 						<td class="font3">Branch ID</td>
-						<td class="font2"><%=profile.get("branchId")%></td>
+						<td class="font2"><%=profile.get("branchID")%></td>
 					</tr>				
 				
 				<%} %>
@@ -115,13 +137,15 @@
 						<button class="button-2">Change Password</button>
 					</a> 
 					
-					<%if (obj instanceof CustomerServices) {%>
+					<%if (obj instanceof CustomerServices) {
+						if(((CustomerServices)obj).isPinSet()){%>
 					
 						<a href="<%=request.getContextPath()%>/app/changePin">
 							<button class="button-2">Change TPIN</button>
 						</a>
 						
-					<%} %>
+						<%}
+					} %>
 			
 				</div>
 			

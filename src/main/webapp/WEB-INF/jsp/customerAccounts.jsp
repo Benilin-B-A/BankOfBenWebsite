@@ -26,7 +26,11 @@
 
 	<jsp:include page="header.jsp" />
 	
-	<jsp:include page="customerNav.jsp" /> <br> <br> <br>
+	<jsp:include page="customerNav.jsp" />
+	
+	<br><br><br>
+	
+	<div class="bContainer">
 	
 	<div class="bodyContainer infoPadding">
 	
@@ -100,7 +104,7 @@
 				<br> <br>
 		
 			</div>
-
+			
 		</div>
 		
 		<div class="innerContainer">
@@ -137,12 +141,12 @@
 
 					<form action="<%=request.getContextPath()%>/app/accounts/makePrimary" method="get">
 					 	<input type="hidden" name="newAcc" value="<%=acc.get("accNum")%>">
-						<button class="button-2" >Make Primary</button>
+						<button class="button-2" >Switch</button>
 					</form>
 				
 				</div>
 		
-				<br><br>
+				<br>
 			
 				<% } 
 				} else{%>
@@ -151,30 +155,33 @@
 				
 				<p class="font3">Create a new account by visiting your nearest BOB branch</p>
 			
-				<%	} %>	
+				<%}%>	
 
 			</div>
 		
 		</div>
+		
+	</div>
 	
 	</div>
 	
-	<%String msg = (String) request.getAttribute("successMessage");
-		if( msg != null) {%>
-				
-	<div class="messageContainer">
-		<p class="successMessage" id="msg"><%=msg%></p>
-	</div>
-	
-	<%}
-	String message = (String) request.getAttribute("errorMessage");
-		if( message != null) {%>
-				
-	<div class="messageContainer">
-		<p class="errorMessage" id="msg"><%=message%></p>
-	</div>
-	
-	<%}	%>
+			<%String msg = (String) request.getAttribute("successMessage");
+		
+			if( msg != null) {%>
+		
+			<div class="messageContainer">
+				<p class="successMessage" id="msg"><%=msg%></p>
+			</div>
+			
+			<%}
+			String message = (String) request.getAttribute("errorMessage");
+				if( message != null) {%>
+						
+			<div class="messageContainer">
+				<p class="errorMessage" id="msg"><%=message%></p>
+			</div>
+			
+			<%}	%>
 	
 </body>
 

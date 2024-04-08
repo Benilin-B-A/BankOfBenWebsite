@@ -56,14 +56,15 @@ public class EmployeeDBAgent implements EmployeeAgent {
 			try(ResultSet set = st.executeQuery()){
 				set.next();
 				Employee emp = new Employee();
-				emp.setName(set.getString(1));
-				emp.setDOB(set.getString(2));
-				emp.setGender(set.getString(3));
-				emp.setAddress(set.getString(4));
-				emp.setMail(set.getString(5));
-				emp.setPhone(set.getLong(6));
-				emp.setStatus(Status.getStatusByState(set.getInt(7)));
-				emp.setBranchID(set.getLong(8));
+				emp.setID(set.getLong(1));
+				emp.setName(set.getString(2));
+				emp.setDOB(set.getString(3));
+				emp.setGender(set.getString(4));
+				emp.setAddress(set.getString(5));
+				emp.setMail(set.getString(6));
+				emp.setPhone(set.getLong(7));
+				emp.setStatus(Status.getStatusByState(set.getInt(8)));
+				emp.setBranchID(set.getLong(9));
 				return emp;
 			}
 		} catch (SQLException exception) {

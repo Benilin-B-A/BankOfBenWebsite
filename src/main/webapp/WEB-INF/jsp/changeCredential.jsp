@@ -101,6 +101,10 @@
 								min=0 max=9999 step=1/> 
 						<br><br>
 					</div>
+					
+					<p class="font4">
+						Pin must be a 4 digit number
+					</p>
 
 					<div>
 						<button type="submit" class="button-2">CONFIRM</button>

@@ -1,3 +1,5 @@
+<%@page import="com.bank.services.EmployeeServices"%>
+<%@page import="java.util.List"%>
 <%@page import="org.eclipse.jdt.internal.compiler.ast.InstanceOfExpression"%>
 <%@page import="com.bank.services.CustomerServices"%>
 <%@page import="com.bank.pojo.Customer"%>
@@ -27,11 +29,14 @@
 	
 		<jsp:include page="customerNav.jsp" />
 	
-	<%}else{ %>
+	<%}else if(userObj instanceof EmployeeServices){ %>
 	
-		<jsp:include page="employeeNav.jsp" />
-	
-	<%} %>
+	<jsp:include page="employeeNav.jsp" />
+
+<%}else{%>
+	<jsp:include page="adminNav.jsp" />
+
+<%} %>
 	
 	<br><br><br><br>
 
@@ -156,7 +161,35 @@
 		
 					</div>
 				
-					<%} %>
+					<%}
+					if((userObj instanceof CustomerServices)){ 
+					%>
+					
+					<div>
+					
+					<label for="accDropDown" class="font3">Account Number : </label>
+					
+					<select id="accDropDown" name="ownAccNumber">
+									
+						<%List<Long> list = (List<Long>) request.getAttribute("accList");
+							for(int i=0;i<list.size();i++){
+								Long accNum = list.get(i);
+							if(((CustomerServices) userObj).isPrimary(accNum)){%>
+								
+								<option value="<%=accNum%>" selected><%=accNum%></option>
+							<%}else{ %>
+							
+  				 	 		<option value="<%=accNum%>"><%=accNum%></option>
+    					
+    					 <%} }%>
+ 					</select>
+					
+					</div>
+					
+					<br>
+						
+					<%}
+					%>
 
 					<div>
 						

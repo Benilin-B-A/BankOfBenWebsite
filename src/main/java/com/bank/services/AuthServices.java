@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 import org.mindrot.jbcrypt.BCrypt;
 
 import com.bank.cache.AccountCache;
+import com.bank.cache.ProfileCache;
 import com.bank.enums.Status;
 import com.bank.exceptions.BankingException;
 import com.bank.exceptions.PersistenceException;
@@ -25,6 +26,7 @@ public class AuthServices {
 	private static CustomerAgent cusAgent = PersistenceObj.getCustmomerAgent();
 	private static AccountsAgent accAgent = PersistenceObj.getAccountsAgent();
 	static AccountCache accCache = AccountCache.getInstance();
+	static ProfileCache proCache = ProfileCache.getInstance();
 
 	public boolean login(long uId, String password) throws BankingException {
 		try {
@@ -44,7 +46,7 @@ public class AuthServices {
 			throw new BankingException("User blocked for exceeding login attempts : Contact BOB authority");
 		} catch (PersistenceException exception) {
 			logger.log(Level.SEVERE, "Login error", exception);
-			throw new BankingException("Login Error : Try Again Later");
+			throw new BankingException("Something went wrong... Try Again Later");
 		}
 	}
 
@@ -77,7 +79,7 @@ public class AuthServices {
 			throw new BankingException("User Blocked : Contact nearby BOB authority to regain access");
 		} catch (PersistenceException | BankingException exception) {
 			logger.log(Level.SEVERE, "Error in authenticating user", exception);
-			throw new BankingException("Authentication Error", exception);
+			throw new BankingException("Incorrect T-PIN", exception);
 		}
 	}
 
@@ -126,6 +128,7 @@ public class AuthServices {
 				setAttempt(uId, 1);
 				setTpinAttempt(uId, 1);
 			}
+			proCache.remove(uId);
 		} catch (PersistenceException exception) {
 			logger.log(Level.SEVERE, "Error in setting user status", exception);
 			exception.printStackTrace();
@@ -152,11 +155,10 @@ public class AuthServices {
 		try {
 			boolean isValidUser = userAgent.isUserPresent(userId);
 			if (!isValidUser) {
-				throw new BankingException("Invalid user Id");
+				throw new BankingException("Invalid User ID");
 			}
 		} catch (PersistenceException exception) {
 			logger.log(Level.SEVERE, "Error in validating user", exception);
-			exception.printStackTrace();
 			throw new BankingException("Couldn't validate user");
 		}
 	}

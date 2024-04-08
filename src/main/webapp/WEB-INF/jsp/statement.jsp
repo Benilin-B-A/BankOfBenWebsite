@@ -1,3 +1,5 @@
+<%@page import="com.bank.services.EmployeeServices"%>
+<%@page import="com.mysql.cj.xdevapi.JsonArray"%>
 <%@page import="com.bank.services.CustomerServices"%>
 <%@page import="com.bank.util.TimeUtil"%>
 <%@page import="com.bank.pojo.Transaction"%>
@@ -32,30 +34,36 @@
 		
 		<jsp:include page="customerNav.jsp" />
 		
-	<%}else{ %>
+	<%}else if (user instanceof EmployeeServices){ %>
 	
 		<jsp:include page="employeeNav.jsp" />
 	
-	<%} %>
+	<%} else{%>
+	
+		<jsp:include page="adminNav.jsp" />
+	
+	<%}if (!(user instanceof CustomerServices)) {%>
 	
 	<br>
 	
-	
-	<%if (!(user instanceof CustomerServices)) {%>
-	
-	<div class="customerNavBarContainer">
+	<div class="buttonContainer">
 	
 		<form action="<%=request.getContextPath()%>/app/statement" method="get">
-			<input type="number" placeholder="Account Number" name="accountNumber" min=1 step=1>
+			<input type="text" placeholder="Account Number" name="accountNumber" min=1 step=1 required
+				pattern="^[0-9]+$" title="Enter valid account number">
 			<button type="submit" class="button-2">View</button>
 		</form>
 		
 	</div>
 	
 	<%}JSONObject statementObject = (JSONObject) request.getAttribute("statements");
-	JSONArray statements = statementObject.getJSONArray("transactionArray"); 
+	JSONArray statements = null;
+	if (statementObject != null){
+		statements = statementObject.getJSONArray("transactionArray"); 
+	}
 	if(statements != null && statements.length()!=0){
-		Long accNum = (Long) request.getAttribute("accNum");
+		Object obj = request.getSession().getAttribute("user");
+		Long accNum = Long.parseLong((String)request.getAttribute("accNum"));
 	%>
 	
 	<p class="font2">Account Number : <%=accNum%></p>
@@ -90,7 +98,12 @@
 				<td><%=TimeUtil.getDateTime(statement.getLong("time")) %></td>
 				<td><%=statement.get("openingBal") %></td>
 				<td><%=statement.get("closingBal") %></td>
-				<td><%=statement.get("description") %></td>
+				<%String description = (String) statement.get("description");
+				if(description == null){%>
+					<td>Nil</td>
+				<%}else { %>
+					<td><%=description%></td>
+				<%} %>
 			</tr>
 		
 			<%} %>
@@ -99,38 +112,49 @@
 
 	</div>
 	
-	<br><br>
+	<br>
 	
-	<%if (user instanceof CustomerServices){ 
-
-		Double pageNos = (Double) statementObject.get("pages");
+	<%Object pageNos = statementObject.get("pages");
+	
+	if (pageNos != null){ 
+	
+	%>
 		
-		int pages = pageNos.intValue();
+	<div class="profileButtonContainer">
+	
+	<%	int pages = ((Double) pageNos).intValue();
 		
 		if (pages>1){
 		
-			for(int i=1;i<pages;i++){%>
-	
-	<div class="profileButtonContainer">
+			for(int i=1;i<=pages;i++){%>
 		
-		<button class="button-2" name="pageNo" value="<%=pages%>"><%=pages%></button>
+		<form action="statement">
 		
-	</div>
+			<input type="hidden" name="accountNumber" value="<%=accNum%>">
+		
+			<button class="button-2" type="submit" name="pageNo" value="<%=i%>"><%=i%></button>
+		
+		</form>
 	
 	<%		}
 		} 
+	%>
+		
+	</div>
 	
-	} %>
+	<%} %>
 	
-	<% } else {
+	<% }else {
 			
 		if(user instanceof CustomerServices){%>
+		
+		<br><br><br>
 			
 		<div class="columnBodyContainer">
 			
 			<img src="<%=request.getContextPath()%>/images/NoStatements.svg" alt="customerDetails">
 		
-			<p class="font2">No statements to view</p>
+			<p class="font2">No statements to view yet :(</p>
 		
 		</div>
 			

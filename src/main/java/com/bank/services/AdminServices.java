@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.bank.enums.Status;
@@ -71,7 +70,7 @@ public class AdminServices {
 
 	}
 
-	public JSONArray getTransStatement(long transId) throws BankingException {
+	public JSONObject getTransStatement(long transId) throws BankingException {
 		return UserServices.getTransStatement(transId);
 	}
 

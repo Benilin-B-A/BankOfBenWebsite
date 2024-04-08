@@ -2,6 +2,9 @@ package com.bank.interfaces;
 
 import java.util.List;
 
+import org.json.JSONObject;
+
+import com.bank.exceptions.BankingException;
 import com.bank.exceptions.PersistenceException;
 import com.bank.pojo.Transaction;
 
@@ -11,8 +14,8 @@ public interface TransactionAgent {
 
 	long getTransactionBranch(long transId) throws PersistenceException;
 	
-	List<Transaction> getAccountStatement(long accNum, int limit, int offset) throws PersistenceException;
+	JSONObject getAccountStatement(long accNum, int limit, int offset) throws PersistenceException, BankingException;
 
-	List<Transaction> getTransactionStatement(long transId) throws PersistenceException;
+	JSONObject getTransactionStatement(long transId) throws PersistenceException, BankingException;
 	
 }

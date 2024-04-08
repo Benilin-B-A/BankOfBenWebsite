@@ -6,13 +6,18 @@ body {
 	overflow-x: hidden;
 }
 
+h1 {
+	font-size: 1.8rem; /* Adjust font size as needed */
+}
+
 h2 {
 	font-family: Inter, sans-serif;
 }
 
-title{
+title {
 	font-family: Inter, sans-serif;
-	color:#2AAA8A;
+	color: black;
+	font-size: medium;
 }
 
 input {
@@ -22,20 +27,14 @@ input {
 	height: 34px;
 	vertical-align: middle;
 	position: relative;
-	border-radius: 22px;
+	border-radius: 10px;
 	box-sizing: border-box;
 	padding: 0 18px;
 }
 
-input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button
-	{
-	-webkit-appearance: textfield;
-	margin: 0;
-}
-
 input[type="number"] {
-	appearance: textfield;
 	-moz-appearance: textfield;
+	appearance: textfield;
 }
 
 select {
@@ -100,7 +99,14 @@ td:first-child {
 	font-family: Inter, sans-serif;
 	color: black;
 	text-align: justify;
-	font-size:12px;
+	font-size: 12px;
+}
+
+.active {
+	background-color: white;
+	color: #b30517;
+	padding: 10px;
+	border-radius: 15px;
 }
 
 .titleContainer {
@@ -108,6 +114,9 @@ td:first-child {
 	flex-direction: row;
 	justify-content: center;
 	align-items: center;
+	width: 100%;
+	height: 70px;
+	margin-bottom: 1%;
 }
 
 .title {
@@ -115,19 +124,18 @@ td:first-child {
 	text-align: center;
 	font-family: Inter, sans-serif;
 	font-size: larger;
-	margin-bottom: 10px;
 }
 
 .titlePadding {
-	background: rgba(255, 255, 255, 0.5);
+	background: rgba(255, 255, 255, 0.3);
 	border-radius: 10px;
 	padding: 0px;
-	margin-bottom: 1%;
+	box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); /* Add shadow */
 }
 
 .navPadding {
 	background: #b30517;
-	padding: 5px;
+	padding: 10px;
 	border-radius: 10px;
 }
 
@@ -135,7 +143,7 @@ td:first-child {
 .button-1 {
 	padding: 10px 20px;
 	border: none;
-	border-radius: 8px;
+	border-radius: 30px;
 	font-weight: bold;
 	font-family: Inter, sans-serif;
 	background: white;
@@ -152,6 +160,27 @@ td:first-child {
 /* red button with white text : white button black text hover */
 .button-2 {
 	padding: 10px 20px;
+	margin-left: 2px; border : none;
+	border-radius: 8px;
+	font-weight: bold;
+	font-family: Inter, sans-serif;
+	background: #b30517;
+	color: white;
+	cursor: pointer;
+	text-decoration: none;
+	border: none;
+}
+
+.searchBoxContainer {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	height: 35px;
+}
+
+.button-4 {
+	padding: 9px 82px;
 	border: none;
 	border-radius: 8px;
 	font-weight: bold;
@@ -159,13 +188,17 @@ td:first-child {
 	background: #b30517;
 	color: white;
 	cursor: pointer;
-	margin-right: 10px;
 	text-decoration: none;
 }
 
+.button-4:hover {
+	background-color: #d91140;
+	color: white;
+}
+
 .button-2:hover {
-	background-color: white;
-	color: black;
+	background-color: #d91140;
+	color: white;
 }
 
 /* Home Page Styling */
@@ -174,13 +207,12 @@ td:first-child {
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
+	width: 100%;
 }
 
 .detailPadding {
 	background: #b30517;
-	padding: 10px;
 	border-radius: 15px;
-	margin-bottom: 30px;
 }
 
 .imageContainer {
@@ -216,7 +248,6 @@ td:first-child {
 }
 
 .innerLoginFormContainer {
-	position: relative;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
@@ -226,6 +257,7 @@ td:first-child {
 .loginFormPadding {
 	background: rgba(255, 255, 255, 0.5);
 	border-radius: 15px;
+	box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); /* Add shadow */
 }
 
 /* Customer Styling */
@@ -236,20 +268,32 @@ td:first-child {
 	flex-direction: row;
 	align-items: center;
 	justify-content: space-between;
+	margin-left: 2.5%;
+	margin-right: 2.5%;
+	height: 35px;
 }
 
 .infoPadding {
-	background: #f2eded;
-	padding: 20px;
-	width: 100%;
+	background: rgba(255, 255, 255, 0.3);
 	border-radius: 10px;
+	width: 100%;
+	box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); /* Add shadow */
 }
 
 .bodyContainer {
 	display: flex;
-	width: 100vw;
+	flex-direction: row;
 	align-items: center;
+	width: 100%;
+	margin-bottom: 1%;
+	/* 	height: 35vw;*/
 	justify-content: space-between;
+}
+
+.bContainer {
+	align-items: center;
+	display: flex;
+	flex-direction: column;
 }
 
 .columnBodyContainer {
@@ -263,7 +307,8 @@ td:first-child {
 
 .transactionContainer {
 	display: flex;
-	justify-content: center; align-items : center;
+	justify-content: center;
+	align-items: center;
 	width: 55%;
 	align-items: center;
 }
@@ -276,6 +321,10 @@ td:first-child {
 	width: 50%;
 }
 
+.img {
+	margin-right: 10%;
+}
+
 .profileButtonContainer {
 	display: flex;
 	justify-content: center;
@@ -286,7 +335,7 @@ td:first-child {
 
 /* customer acc styling */
 .accContainer {
-	display: flex;
+	overflow-y: auto;
 	flex-direction: column;
 	justify-content: space-between;
 	align-items: center;
@@ -325,14 +374,11 @@ td:first-child {
 .individualAccPadding {
 	background: rgb(198, 198, 198, 0.1);
 	padding: 20px;
-	width: 100%;
+	width: 90%;
 	border-radius: 10px;
 }
 
 .successMessage {
-	/* position:fixed;
-	top:94%;
-	left: 45%; */
 	font-family: Inter, sans-serif;
 	font-weight: bold;
 	background-color: #4CBB17;
@@ -340,6 +386,7 @@ td:first-child {
 	padding: 10px 20px;
 	border-radius: 15px;
 	opacity: 0;
+	transition: opacity 0.5s ease;
 }
 
 .errorMessage {
@@ -353,4 +400,5 @@ td:first-child {
 	padding: 10px 20px;
 	border-radius: 15px;
 	opacity: 0;
+	transition: opacity 0.5s ease;
 }

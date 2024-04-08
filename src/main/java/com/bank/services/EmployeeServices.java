@@ -86,7 +86,7 @@ public class EmployeeServices {
 		return UserServices.getAccountStatement(accNum, page);
 	}
 
-	public JSONArray getTransStatement(long transId) throws BankingException {
+	public JSONObject getTransStatement(long transId) throws BankingException {
 		try {
 			long branchId = tranAgent.getTransactionBranch(transId);
 			if (branchId == empAgent.getBranchId(userId)) {

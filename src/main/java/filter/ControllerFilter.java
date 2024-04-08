@@ -38,9 +38,6 @@ public class ControllerFilter implements Filter {
 		setNoCache(res);
 
 		String path = req.getPathInfo();
-//		System.out.println(path);
-//		System.out.println(req.getSession().getId());
-//		System.out.println(req.getSession().getAttribute("user"));
 
 		switch (path) {
 
@@ -105,14 +102,10 @@ public class ControllerFilter implements Filter {
 				if(newPin.equals(reNewPin)) {
 					chain.doFilter(request, response);
 				}else {
-					req.setAttribute("errorMessage", "Pin doesn't match");
+					req.setAttribute("errorMessage", "Entered pin doesn't match");
 					req.getRequestDispatcher("/WEB-INF/jsp/setPin.jsp").forward(req, res);
 				}
 			}
-			break;
-
-		case "/logout":
-			chain.doFilter(request, response);
 			break;
 
 		default:

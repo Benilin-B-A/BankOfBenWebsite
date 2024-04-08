@@ -6,6 +6,6 @@
 
 		setTimeout(function() {
 			message.style.opacity = 0;
-		}, 1500);
+		}, 1000);
 	});
 </script>

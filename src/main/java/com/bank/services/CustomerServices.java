@@ -69,6 +69,13 @@ public class CustomerServices {
 		return UserServices.getBalance(accNum);
 	}
 
+	public boolean isPrimary(long accNum) {
+		if(accNum == currentAccount.getAccNum()) {
+			return true;
+		}
+		return false;
+	}
+	
 	public void withdraw(long amount, String pin) throws BankingException, InvalidInputException {
 		AuthServices.authPin(userId, pin);
 		UserServices.withdraw(currentAccount.getAccNum(), amount);
@@ -81,7 +88,6 @@ public class CustomerServices {
 	public void transfer(Transaction transaction, String pin, boolean withinBank)
 			throws BankingException{
 		AuthServices.authPin(userId, pin);
-		transaction.setAccNumber(currentAccount.getAccNum());
 		UserServices.transferMoney(transaction, withinBank);
 	}
 
@@ -106,12 +112,12 @@ public class CustomerServices {
 		}
 	}
 
-	public JSONObject getAccountStatement() throws BankingException {
-		return getAccountStatement(1);
+	public JSONObject getAccountStatement(long accountNum) throws BankingException {
+		return getAccountStatement(accountNum, 1);
 	}
 
-	public JSONObject getAccountStatement(int page) throws BankingException {
-		return UserServices.getAccountStatement(currentAccount.getAccNum(), page);
+	public JSONObject getAccountStatement(long accountNum, int page) throws BankingException {
+		return UserServices.getAccountStatement(accountNum, page);
 	}
 
 	public void switchAccount(long accoNum) throws BankingException {

@@ -4,6 +4,8 @@
 	
 		<a href="<%=request.getContextPath()%>/app/profile" class="link font1">Profile</a>
 		
+		<a href="<%=request.getContextPath()%>/app/organisation" class="link font1">Organisation</a>
+		
 		<a href="<%=request.getContextPath()%>/app/customerDetails" class="link font1">Manage Customers</a>
 	
 		<a href="<%=request.getContextPath()%>/app/accountDetails" class="link font1">Manage Accounts</a>
