@@ -18,7 +18,8 @@ public class AccountsTableQuery {
 
 	public static String getCustomerAccounts = "select * from Accounts where CUSTOMER_ID = ? ";
 
-	public static String addAccount = "insert into Accounts(CUSTOMER_ID,ACCOUNT_TYPE,BRANCH_ID,IS_PRIMARY,OPENED_ON) values (?,?,?,?,?)";
+	public static String addAccount = "insert into Accounts(CUSTOMER_ID,ACCOUNT_TYPE,BRANCH_ID,IS_PRIMARY,OPENED_ON"
+			+ ",CREATED_ON, MODIFIED_BY) values (?,?,?,?,?,?,?)";
 
 	public static String getAccountStatus = "select ACC_STATUS from Accounts where ACC_NUMBER = ?";
 

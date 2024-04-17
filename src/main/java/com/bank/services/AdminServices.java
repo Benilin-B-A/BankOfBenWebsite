@@ -18,8 +18,10 @@ import com.bank.pojo.Account;
 import com.bank.pojo.Branch;
 import com.bank.pojo.Customer;
 import com.bank.pojo.Employee;
+import com.bank.pojo.Event;
 import com.bank.pojo.Transaction;
 import com.bank.util.LogHandler;
+import com.bank.util.TimeUtil;
 import com.bank.util.Validator;
 
 
@@ -38,27 +40,39 @@ public class AdminServices {
 	private static BranchAgent branchAgent = PersistenceObj.getBranchAgent();
 	private static TransacAgent trAgnet = PersistenceObj.getTransacAgent();
 
-	public long getBalance(long aNum) throws BankingException {
-		AuthServices.validateAccountPresence(aNum);
-		return UserServices.getBalance(aNum);
+	public long getBalance(long accNum) throws BankingException {
+		AuthServices.validateAccountPresence(accNum);
+		return UserServices.getBalance(accNum);
 	}
 
 	public void withdraw(long accNum, long amount) throws BankingException {
-		UserServices.withdraw(accNum, amount);
+		UserServices.withdraw(accNum, amount, this.userId);
+		log("Withdraw", UserServices.getCustomerId(accNum), "Money withdrawn from bank");
 	}
 
 	public void deposit(long accNum, long amount) throws BankingException {
-		UserServices.deposit(accNum, amount);
+		UserServices.deposit(accNum, amount, this.userId);
+		log("Deposit", UserServices.getCustomerId(accNum), "Money deposited in bank");
 	}
 
 	public void transfer(Transaction trans, long accNum, boolean withinBank) throws BankingException {
 		AuthServices.validateAccount(accNum);
 		trans.setAccNumber(accNum);
+		trans.setCreatedBy(this.userId);
 		UserServices.transferMoney(trans, withinBank);
+		String str = null;
+		if(withinBank) {
+			str = "Money transfered within bank to account number :";
+		}else {
+			str = "Money transfered  outside bank to account number :";
+		}
+		log("Money transfer", UserServices.getCustomerId(accNum),str + trans.getTransactionAccountNumber());
 	}
 
 	public void changePassword(String oldPass, String newPass) throws BankingException {
 		UserServices.changePassword(userId, oldPass, newPass);
+		log("Password changed", this.userId,
+				"Password changed");
 	}
 
 	public JSONObject getAccountStatement(long accNum) throws BankingException {
@@ -67,7 +81,6 @@ public class AdminServices {
 	
 	public JSONObject getAccountStatement(long accNum, int page) throws BankingException {
 		return UserServices.getAccountStatement(accNum, page);
-
 	}
 
 	public JSONObject getTransStatement(long transId) throws BankingException {
@@ -89,10 +102,13 @@ public class AdminServices {
 			String password = AuthServices.hashPassword(emp.getDOB());
 			emp.setLevel(UserLevel.Employee);
 			isBranchPresent(emp.getBranchID());
-			return trAgnet.addEmployee(emp, password);
+			emp.setModifiedBy(this.userId);
+			emp.setCreatedOn(TimeUtil.getTime());
+			long empId = trAgnet.addEmployee(emp, password);
+			log("New Employee added", empId, "New Employee ID : " + empId);
+			return empId;
 		} catch (PersistenceException exception) {
 			logger.log(Level.SEVERE, "Error in adding Employee", exception);
-			exception.printStackTrace();
 			throw new BankingException("Couldn't add Employee");
 		}
 	}
@@ -112,13 +128,20 @@ public class AdminServices {
 	public long addAccount(Account account, long branchId) throws BankingException {
 		isBranchPresent(branchId);
 		account.setBranchId(branchId);
-		return UserServices.addAccount(account);
+		account.setModifiedBy(this.userId);
+		long accNumber = UserServices.addAccount(account);
+		log("New Account added", UserServices.getCustomerId(accNumber), "New Account ID : " + accNumber);
+		return accNumber;
 	}
 
 	public long addCustomer(Customer cus, Account acc, long branchId) throws BankingException {
 		isBranchPresent(branchId);
 		acc.setBranchId(branchId);
-		return UserServices.addCustomer(cus, acc);
+		cus.setModifiedBy(this.userId);
+		acc.setModifiedBy(this.userId);
+		long customerId = UserServices.addCustomer(cus, acc);
+		log("New Customer added", customerId, "New Customer ID : " + customerId);
+		return customerId;
 		
 	}
 	
@@ -129,8 +152,11 @@ public class AdminServices {
 			Validator.validateAlphaNum(iFSC);
 			if(branchAgent.isIFSCPresent(iFSC)) {
 				throw new BankingException("IFSC code already exists");
-			}			
-			branchAgent.addBranch(branch);
+			}		
+			branch.setCreatedOn(TimeUtil.getTime());
+			branch.setModifiedBy(this.userId);
+			long branchId = branchAgent.addBranch(branch);
+			log("New Branch added", branchId, "New Branch ID : " + branchId);
 		} catch(PersistenceException exception){
 			logger.log(Level.SEVERE,"Error in adding Branch",exception);
 			throw new BankingException("Couldn't add branch");
@@ -142,11 +168,13 @@ public class AdminServices {
 
 	public void setStatus(long customerId, Status state) throws BankingException {
 		AuthServices.setStatus( customerId, state);
+		log("Customer status update", customerId, "Customer status set to " + state);
 	}
 
 	public void setAccountStatus(long accNum, Status status) throws BankingException {
 		AuthServices.validateAccountPresence(accNum);
 		AuthServices.setAccountStatus(accNum, status);
+		log("Account status update", UserServices.getCustomerId(accNum), "Account status set to " + status);
 	}
 	
 	public List<Branch> getBranches() throws BankingException{
@@ -161,6 +189,7 @@ public class AdminServices {
 	public void closeAcc(long accNum) throws BankingException {
 		AuthServices.validateAccountPresence(accNum);
 		UserServices.closeAcc(accNum);
+		log("Account closed", UserServices.getCustomerId(accNum), "Account number " + accNum);
 	}
 
 	public JSONObject getCustomerDetails(long cusId) throws BankingException {
@@ -173,5 +202,15 @@ public class AdminServices {
 	
 	public JSONObject getEmployeeDetails(long empId) throws BankingException{
 		return UserServices.getEmployeeDetails(empId);
+	}
+	
+	private void log(String eventName, Long targetId, String description) {
+		Event event = new Event();
+		event.setUserId(this.userId);
+		event.setEvent(eventName);
+		event.setTargetUserId(targetId);
+		event.setDescription(description);
+		event.setTime(TimeUtil.getTime());
+		EventLogger.log(event);
 	}
 }

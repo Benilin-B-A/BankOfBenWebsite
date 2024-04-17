@@ -50,6 +50,8 @@ public class TransactionDBAgent implements TransactionAgent {
 			st.setLong(8, trans.getOpeningBal());
 			st.setLong(9, trans.getClosingBal());
 			st.setString(10, trans.getDescription());
+			st.setLong(11, trans.getCreatedBy());
+			st.setLong(12, trans.getCreatedOn());
 			st.executeUpdate();
 		} catch (SQLException exception) {
 			throw new PersistenceException("Error in transaction", exception);

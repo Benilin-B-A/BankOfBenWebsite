@@ -14,8 +14,37 @@ public abstract class User {
 	protected Status userStatus;
 	protected String address;
 	protected UserLevel userLevel;
+	protected long createdOn;
+	protected long modifiedOn;
+	protected long modifiedBy;
 	
 	
+	
+	
+	public long getCreatedOn() {
+		return createdOn;
+	}
+
+	public void setCreatedOn(long createdOn) {
+		this.createdOn = createdOn;
+	}
+
+	public long getModifiedOn() {
+		return modifiedOn;
+	}
+
+	public void setModifiedOn(long modifiedOn) {
+		this.modifiedOn = modifiedOn;
+	}
+
+	public long getModifiedBy() {
+		return modifiedBy;
+	}
+
+	public void setModifiedBy(long modifiedBy) {
+		this.modifiedBy = modifiedBy;
+	}
+
 	public String toString() {
 		return ("Name : " + this.name + "\nDOB : " + this.dOB + "\nGender : " + this.gender + "\nAddress : "
 				+ this.eMail + "\nPhone : " + this.phone + "\nStatus : " + this.userStatus + "\nAddress : ");

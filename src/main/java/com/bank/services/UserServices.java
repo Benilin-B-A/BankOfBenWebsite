@@ -25,6 +25,7 @@ import com.bank.pojo.Customer;
 import com.bank.pojo.Employee;
 import com.bank.pojo.Transaction;
 import com.bank.util.LogHandler;
+import com.bank.util.TimeUtil;
 import com.bank.util.Validator;
 
 public abstract class UserServices {
@@ -60,10 +61,11 @@ public abstract class UserServices {
 		}
 	}
 
-	static void withdraw(long accNum, long amount) throws BankingException {
+	static void withdraw(long accNum, long amount, long empID) throws BankingException {
 		AuthServices.validateAccount(accNum);
 		Transaction trans = new Transaction();
 		trans.setAccNumber(accNum);
+		trans.setCreatedBy(empID);
 		trans.setAmount(amount);
 		trans.setDescription("Withdrawl");
 		trans.setTransactionId(System.currentTimeMillis());
@@ -81,10 +83,11 @@ public abstract class UserServices {
 		doTransaction(trans);
 	}
 
-	static void deposit(long accNum, long amount) throws BankingException {
+	static void deposit(long accNum, long amount, long empId) throws BankingException {
 		AuthServices.validateAccount(accNum);
 		Transaction trans = new Transaction();
 		trans.setAccNumber(accNum);
+		trans.setCreatedBy(empId);
 		trans.setCustomerId(getCustomerId(trans.getAccNumber()));
 		trans.setDescription("Deposit");
 		trans.setTransactionId(System.currentTimeMillis());
@@ -103,6 +106,7 @@ public abstract class UserServices {
 	
 	private static void doTransaction(Transaction trans) throws BankingException {
 		try {
+			trans.setCreatedOn(TimeUtil.getTime());
 			tranAgent.doTransaction(trans);
 		} catch (PersistenceException exception) {
 			logger.log(Level.SEVERE, "Error in deposit", exception);
@@ -117,7 +121,7 @@ public abstract class UserServices {
 			throw new BankingException("Transaction is null");
 		}
 		long senderAccNum = trans.getAccNumber();
-		long tId = System.currentTimeMillis();
+		long tId = TimeUtil.getTime();
 		trans.setTransactionId(tId);
 		Transaction recepient = null;
 		if (withinBank) {
@@ -219,12 +223,13 @@ public abstract class UserServices {
 			throw new BankingException("Customer/Account is null");
 		}
 		try {
+			cus.setCreatedOn(TimeUtil.getTime());
+			account.setCreatedOn(TimeUtil.getTime());
 			account.setPrimary(true);
 			String password = AuthServices.hashPassword(cus.getDOB());
 			cus.setLevel(UserLevel.Customer);
 			return trAgnet.addCustomer(cus, account, password);
 		} catch (PersistenceException exception) {
-			exception.printStackTrace();
 			logger.log(Level.SEVERE, "Error in adding Customer", exception);
 			throw new BankingException("Couldn't add Customer", exception);
 		}
@@ -244,6 +249,7 @@ public abstract class UserServices {
 	static long addAccount(Account account) throws BankingException {
 		try {
 			Validator.checkNull(account);
+			account.setCreatedOn(TimeUtil.getTime());
 		} catch (InvalidInputException exception) {
 			throw new BankingException("Account is null");
 		}
@@ -251,7 +257,6 @@ public abstract class UserServices {
 			return trAgnet.addAccount(account);
 		} catch (PersistenceException exception) {
 			logger.log(Level.SEVERE, "Error in adding account", exception);
-			exception.printStackTrace();
 			throw new BankingException("Couldn't add account");
 		}
 
@@ -265,4 +270,6 @@ public abstract class UserServices {
 			throw new BankingException("Account cannot be closed", exception);
 		}
 	}
+
+	
 }

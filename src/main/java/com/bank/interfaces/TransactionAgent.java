@@ -1,7 +1,5 @@
 package com.bank.interfaces;
 
-import java.util.List;
-
 import org.json.JSONObject;
 
 import com.bank.exceptions.BankingException;

@@ -13,4 +13,8 @@ public class TimeUtil {
 		ZonedDateTime zDT = ZonedDateTime.ofInstant(Instant.ofEpochMilli(time), ZoneId.systemDefault());
 		return zDT.format(formatter);
 	}
+	
+	public static long getTime() {
+		return System.currentTimeMillis();
+	}
 }

@@ -16,8 +16,10 @@ import com.bank.interfaces.AccountsAgent;
 import com.bank.interfaces.CustomerAgent;
 import com.bank.persistence.util.PersistenceObj;
 import com.bank.pojo.Account;
+import com.bank.pojo.Event;
 import com.bank.pojo.Transaction;
 import com.bank.util.LogHandler;
+import com.bank.util.TimeUtil;
 import com.bank.util.Validator;
 
 public class CustomerServices {
@@ -78,33 +80,49 @@ public class CustomerServices {
 	
 	public void withdraw(long amount, String pin) throws BankingException, InvalidInputException {
 		AuthServices.authPin(userId, pin);
-		UserServices.withdraw(currentAccount.getAccNum(), amount);
+		UserServices.withdraw(currentAccount.getAccNum(), amount, this.userId);
+		log("Withdraw", this.userId, "Money withdrawn from bank");
 	}
 
 	public void deposit(long amount) throws BankingException {
-		UserServices.deposit(currentAccount.getAccNum(), amount);
+		UserServices.deposit(currentAccount.getAccNum(), amount, this.userId);
+		log("Deposit", this.userId, "Money deposited in bank");
 	}
 
 	public void transfer(Transaction transaction, String pin, boolean withinBank)
 			throws BankingException{
 		AuthServices.authPin(userId, pin);
+		transaction.setCreatedBy(this.userId);
 		UserServices.transferMoney(transaction, withinBank);
+		String str = null;
+		if(withinBank) {
+			str = "Money transfered within bank to account number :";
+		}else {
+			str = "Money transfered  outside bank to account number :";
+		}
+		log("Money transfer", this.userId,str + "Amount transferd from account number : " + transaction.getAccNumber());
 	}
 
 	public void changePassword(String oldPass, String newPass) throws BankingException {
 		UserServices.changePassword(userId, oldPass, newPass);
+		log("Password changed", this.userId,
+				"Password changed");
 	}
 
 	public void changePin(String oldPin, String newPin)
 			throws BankingException, InvalidInputException {
 		AuthServices.authPin(userId, oldPin);
 		setPin(newPin);
+		log("T-PIN changed", this.userId,
+				"T-PIN changed");
 	}
 
 	public void setPin(String newPin) throws BankingException, InvalidInputException {
 		try {
 			Validator.validatePin(newPin);
 			cusAgent.setPin(AuthServices.hashPassword(newPin), userId);
+			log("T-PIN set", this.userId,
+					"T-PIN set");
 			isPinSet = true;
 		} catch (PersistenceException exception) {
 			logger.log(Level.SEVERE, "Couldn't set pin", exception);
@@ -125,6 +143,8 @@ public class CustomerServices {
 		try {
 			accAgent.switchPrimary(userId, currentAccount.getAccNum(), accoNum);
 			currentAccount = accCache.get(accoNum);
+			log("Primary account switched", this.userId,
+					"Primary account switched");
 		} catch (PersistenceException exception) {
 			logger.log(Level.SEVERE, "Error in switching account", exception);
 			throw new BankingException("Couldn't switch account");
@@ -158,4 +178,16 @@ public class CustomerServices {
 	public List<Long> getAllAcc() throws BankingException {
 		return accsCache.get(userId);
 	}
+
+	private void log(String eventName, Long targetId, String description) {
+		Event event = new Event();
+		event.setUserId(this.userId);
+		event.setEvent(eventName);
+		event.setTargetUserId(targetId);
+		event.setDescription(description);
+		event.setTime(TimeUtil.getTime());
+		EventLogger.log(event);
+	}
 }
+
+

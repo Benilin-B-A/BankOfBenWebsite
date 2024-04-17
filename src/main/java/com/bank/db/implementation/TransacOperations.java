@@ -96,6 +96,8 @@ public class TransacOperations implements TransacAgent {
 			st.setLong(3, account.getBranchId());
 			st.setBoolean(4, account.isPrimary());
 			st.setLong(5, System.currentTimeMillis());
+			st.setLong(6, account.getCreatedOn());
+			st.setLong(7, account.getModifiedBy());
 			st.execute();
 			try (ResultSet set = st.getGeneratedKeys()) {
 				set.next();
@@ -113,6 +115,8 @@ public class TransacOperations implements TransacAgent {
 			st.setLong(3, account.getBranchId());
 			st.setBoolean(4, account.isPrimary());
 			st.setLong(5, System.currentTimeMillis());
+			st.setLong(6, account.getCreatedOn());
+			st.setLong(7, account.getModifiedBy());
 			st.execute();
 		}
 	}
@@ -145,6 +149,8 @@ public class TransacOperations implements TransacAgent {
 			statement.setInt(6, usr.getLevel().getLevel());
 			statement.setString(7, usr.getAddress());
 			statement.setString(8, password);
+			statement.setLong(9,usr.getCreatedOn());
+			statement.setLong(10, usr.getModifiedBy());
 			statement.executeUpdate();
 			try (ResultSet set = statement.getGeneratedKeys()) {
 				set.next();

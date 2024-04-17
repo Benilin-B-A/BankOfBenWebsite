@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,13 +33,19 @@ public class BranchDBAgent implements BranchAgent{
 	}
 	
 	@Override
-	public void addBranch(Branch branch) throws PersistenceException {
+	public long addBranch(Branch branch) throws PersistenceException {
 		try (Connection connection = connect();
-				PreparedStatement st = connection.prepareStatement(BranchTableQuery.addBranch)) {
+				PreparedStatement st = connection.prepareStatement(BranchTableQuery.addBranch, Statement.RETURN_GENERATED_KEYS)) {
 			st.setString(1, branch.getBranchName());
 			st.setString(2, branch.getIFSC());
 			st.setString(3, branch.getAddress());
+			st.setLong(3, branch.getCreatedOn());
+			st.setLong(3, branch.getModifiedBy());
 			st.execute();
+			try (ResultSet set = st.getGeneratedKeys()) {
+				set.next();
+				return set.getLong(1);
+			}
 		} catch (SQLException exception) {
 			throw new PersistenceException("Couldn't add Branch", exception);
 		}

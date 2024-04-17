@@ -7,7 +7,7 @@ import com.bank.pojo.Branch;
 
 public interface BranchAgent {
 
-	void addBranch(Branch branch) throws PersistenceException;
+	long addBranch(Branch branch) throws PersistenceException;
 
 	boolean isIFSCPresent(String iFSC) throws PersistenceException;
 

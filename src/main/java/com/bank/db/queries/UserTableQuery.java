@@ -18,6 +18,6 @@ public class UserTableQuery {
 	
 	public static String changePassword = "update User set PASSWORD = ? where ID = ?";
 
-	public static String addUser = "insert into User(NAME,DOB,PHONE,EMAIL,GENDER,LEVEL,ADDRESS,PASSWORD) "
-			+ "values(?,?,?,?,?,?,?,?)";
+	public static String addUser = "insert into User(NAME,DOB,PHONE,EMAIL,GENDER,LEVEL,ADDRESS,PASSWORD, CREATED_ON, MODIFIED_BY) "
+			+ "values(?,?,?,?,?,?,?,?,?,?)";
 }

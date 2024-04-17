@@ -15,7 +15,28 @@ public class Account {
 	private long openedOn;
 	private boolean primary;
 	private String branch;
+	protected long createdOn;
+	protected long modifiedOn;
+	protected long modifiedBy;
 	
+	public long getCreatedOn() {
+		return createdOn;
+	}
+	public void setCreatedOn(long createdOn) {
+		this.createdOn = createdOn;
+	}
+	public long getModifiedOn() {
+		return modifiedOn;
+	}
+	public void setModifiedOn(long modifiedOn) {
+		this.modifiedOn = modifiedOn;
+	}
+	public long getModifiedBy() {
+		return modifiedBy;
+	}
+	public void setModifiedBy(long modifiedBy) {
+		this.modifiedBy = modifiedBy;
+	}
 	public String getBranch() {
 		return this.branch;
 	}
@@ -55,22 +76,18 @@ public class Account {
 		this.balance = balance;
 	}
 
-	@SuppressWarnings("exports")
 	public AccountType getType() {
 		return accounType;
 	}
 
-	@SuppressWarnings("exports")
 	public void setType(AccountType type) {
 		this.accounType = type;
 	}
 
-	@SuppressWarnings("exports")
 	public Status getStatus() {
 		return status;
 	}
 
-	@SuppressWarnings("exports")
 	public void setStatus(Status status) {
 		this.status = status;
 	}

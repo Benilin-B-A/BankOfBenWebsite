@@ -3,7 +3,7 @@ package com.bank.db.queries;
 public class TransactionTableQuery {
 
 	public static String transfer = "insert into Transactions(CUSTOMER_ID,TRANSACTION_ID,ACCOUNT_NUMBER,AMOUNT,TYPE,TRANSACTION_ACC_NUMBER,"
-			+ "TIME,OPENING_BAL,CLOSING_BAL,DESCRIPTION) values(?,?,?,?,?,?,?,?,?,?)";;
+			+ "TIME,OPENING_BAL,CLOSING_BAL,DESCRIPTION, CREATED_BY, CREATED_ON) values(?,?,?,?,?,?,?,?,?,?,?,?)";;
 
 	public static String getAccountStatement = "select * from Transactions where ACCOUNT_NUMBER = ? "
 			+ "order by TRANSACTION_ID desc limit ? offset ?";

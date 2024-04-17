@@ -41,6 +41,7 @@ public class Controller extends HttpServlet {
 
 		// home to login
 		case "/login":
+//			System.out.println(request.getRemoteAddr());
 			request.getRequestDispatcher("/WEB-INF/jsp/login.jsp").forward(request, response);
 			break;
 
@@ -304,9 +305,17 @@ public class Controller extends HttpServlet {
 		case "/changePassword":
 			String oldPassword = (String) request.getParameter("oldPassword");
 			String newPassword = (String) request.getParameter("newPassword");
+			Object service = getUserObject(request);
 			try {
-				CustomerServices service = (CustomerServices) getUserObject(request);
-				service.changePassword(oldPassword, newPassword);
+				if(service instanceof CustomerServices) {
+					((CustomerServices) service).changePassword(oldPassword, newPassword);
+				}
+				else if(service instanceof EmployeeServices) {
+					((EmployeeServices) service).changePassword(oldPassword, newPassword);
+				}
+				else {
+					((AdminServices) service).changePassword(oldPassword, newPassword);
+				}
 				viewProfile(request);
 				request.setAttribute("successMessage", "Password changed successfully");
 			} catch (BankingException exception) {
@@ -436,7 +445,8 @@ public class Controller extends HttpServlet {
 				request.setAttribute("successMessage", "Customer created successfully");
 				setCustomerDetails(request);
 			} catch (BankingException exception) {
-				request.setAttribute("errorMessage", "Couldn't create Customer at the moment");
+				exception.printStackTrace();
+				request.setAttribute("errorMessage", exception.getMessage());
 			} finally {
 				request.setAttribute("tab", "viewCustomer");
 				request.getRequestDispatcher("/WEB-INF/jsp/customer.jsp").forward(request, response);
@@ -515,13 +525,10 @@ public class Controller extends HttpServlet {
 			try {
 				employeeID = ((AdminServices) objec).addEmployee(emp);
 				request.setAttribute("employeeID", employeeID);
-				request.setAttribute("successMessage", "Employee created successfully");
 				setEmployeeDetails(request);
-				System.out.println(request.getAttribute("employeeDetails"));
-			} catch (BankingException exception) {
-				request.setAttribute("errorMessage", "Couldn't create Employee at the moment");
-			} catch (InvalidInputException exception) {
-				request.setAttribute("errorMessage", "Couldn't create Employee at the moment");
+				request.setAttribute("successMessage", "Employee created successfully");
+			} catch (BankingException | InvalidInputException exception) {
+				request.setAttribute("errorMessage", exception.getMessage());
 			} finally {
 				request.setAttribute("tab", "viewEmployee");
 				request.getRequestDispatcher("/WEB-INF/jsp/organisation.jsp").forward(request, response);
@@ -697,7 +704,6 @@ public class Controller extends HttpServlet {
 			JSONObject empDetails;
 			try {
 				empDetails = ((AdminServices) obj).getEmployeeDetails(employeeID);
-				System.out.println(empDetails);
 				request.setAttribute("employeeDetails", empDetails);
 			} catch (BankingException exception) {
 				request.setAttribute("errorMessage", exception.getMessage());

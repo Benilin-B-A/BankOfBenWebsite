@@ -10,6 +10,26 @@ public class Transaction {
 	private long amount;
 	private String description;
 	private long customerId;
+	private long createdBy;
+	private long createdOn;
+	
+	
+
+	public long getCreatedBy() {
+		return createdBy;
+	}
+
+	public void setCreatedBy(long createdBy) {
+		this.createdBy = createdBy;
+	}
+
+	public long getCreatedOn() {
+		return createdOn;
+	}
+
+	public void setCreatedOn(long createdOn) {
+		this.createdOn = createdOn;
+	}
 
 	public String getDescription() {
 		return description;

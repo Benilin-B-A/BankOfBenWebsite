@@ -4,6 +4,7 @@ import com.bank.db.implementation.AccountsDBAgent;
 import com.bank.db.implementation.BranchDBAgent;
 import com.bank.db.implementation.CustomerDBAgent;
 import com.bank.db.implementation.EmployeeDBAgent;
+import com.bank.db.implementation.LogsDBAgent;
 import com.bank.db.implementation.TransacOperations;
 import com.bank.db.implementation.TransactionDBAgent;
 import com.bank.db.implementation.UserDBAgent;
@@ -11,6 +12,7 @@ import com.bank.interfaces.AccountsAgent;
 import com.bank.interfaces.BranchAgent;
 import com.bank.interfaces.CustomerAgent;
 import com.bank.interfaces.EmployeeAgent;
+import com.bank.interfaces.LogsAgent;
 import com.bank.interfaces.TransacAgent;
 import com.bank.interfaces.TransactionAgent;
 import com.bank.interfaces.UserAgent;
@@ -21,6 +23,7 @@ public class PersistenceObj {
 	}
 
 	private final static UserAgent userAgent = UserDBAgent.getUserDBAgent();
+	private final static LogsAgent logsAgent = LogsDBAgent.getLogsDBAgent();
 	private final static AccountsAgent accAgent = AccountsDBAgent.getAccountsDBAgent();
 	private final static EmployeeAgent empAgent = EmployeeDBAgent.getEmployeeDBAgent();
 	private final static CustomerAgent cusAgent = CustomerDBAgent.getCustomerDBAgent();
@@ -33,6 +36,10 @@ public class PersistenceObj {
 		return trAgent;
 	}
 
+	public static LogsAgent getLogsAgent() {
+		return logsAgent;
+	}
+	
 	public static UserAgent getUserAgent() {
 		return userAgent;
 	}
