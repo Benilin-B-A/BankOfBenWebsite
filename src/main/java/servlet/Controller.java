@@ -1,6 +1,7 @@
 package servlet;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -36,6 +37,8 @@ public class Controller extends HttpServlet {
 			throws ServletException, IOException {
 
 		String path = request.getPathInfo();
+//		System.out.println(path);
+//		System.out.println(request.getRequestURL());
 
 		switch (path) {
 
@@ -186,8 +189,19 @@ public class Controller extends HttpServlet {
 
 		case "/customerDetails":
 			setCustomerDetails(request);
-			request.setAttribute("tab", "viewCustomer");
-			request.getRequestDispatcher("/WEB-INF/jsp/customer.jsp").forward(request, response);
+			String requestType = (String) request.getAttribute("type");
+			if(requestType != null) {
+				if (requestType.equals("api")) {
+			        response.setContentType("text/plain");
+			        PrintWriter out = response.getWriter();
+			        out.println(request.getAttribute("customerDetails"));
+				}
+			}
+			else {
+				request.setAttribute("tab", "viewCustomer");
+				request.getRequestDispatcher("/WEB-INF/jsp/customer.jsp").forward(request, response);
+			}
+			
 			break;
 
 		case "/employeeDetails":
@@ -307,13 +321,11 @@ public class Controller extends HttpServlet {
 			String newPassword = (String) request.getParameter("newPassword");
 			Object service = getUserObject(request);
 			try {
-				if(service instanceof CustomerServices) {
+				if (service instanceof CustomerServices) {
 					((CustomerServices) service).changePassword(oldPassword, newPassword);
-				}
-				else if(service instanceof EmployeeServices) {
+				} else if (service instanceof EmployeeServices) {
 					((EmployeeServices) service).changePassword(oldPassword, newPassword);
-				}
-				else {
+				} else {
 					((AdminServices) service).changePassword(oldPassword, newPassword);
 				}
 				viewProfile(request);
@@ -383,9 +395,10 @@ public class Controller extends HttpServlet {
 				exception.printStackTrace();
 				request.setAttribute("errorMessage", "Couldn't complete transaction at the moment");
 			} finally {
-				CustomerServices cusServ = (CustomerServices) request.getSession().getAttribute("user");
-
-				setAllAccounts(request, cusServ);
+				Object serv = getUserObject(request);
+				if (serv instanceof CustomerServices) {
+					setAllAccounts(request, ((CustomerServices) serv));
+				}
 				request.getRequestDispatcher("/WEB-INF/jsp/transaction.jsp").forward(request, response);
 			}
 			break;
@@ -516,9 +529,9 @@ public class Controller extends HttpServlet {
 					+ request.getParameter("pincode"));
 			emp.setBranchID(Long.parseLong(request.getParameter("branchId")));
 			String adminPriv = request.getParameter("adminPrivileges");
-			if(adminPriv.equals("true")) {
+			if (adminPriv.equals("true")) {
 				emp.setLevel(UserLevel.Admin);
-			}else {
+			} else {
 				emp.setLevel(UserLevel.Employee);
 			}
 			long employeeID = 0;
@@ -714,4 +727,5 @@ public class Controller extends HttpServlet {
 	private Object getUserObject(HttpServletRequest request) {
 		return request.getSession(false).getAttribute("user");
 	}
+
 }

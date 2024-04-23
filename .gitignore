@@ -1,2 +1,8 @@
 /build/
 /target/
+/AccountsCache.txt
+/AccountsCache.txt.1
+/AccountsCache.txt.2
+/EventLogger.txt
+/EventLogger.txt.1
+/EventLogger.txt.2

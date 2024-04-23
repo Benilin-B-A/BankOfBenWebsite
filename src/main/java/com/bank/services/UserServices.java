@@ -134,6 +134,7 @@ public abstract class UserServices {
 			recepient.setDescription(trans.getDescription());
 			recepient.setAmount(trans.getAmount());
 			recepient.setTransactionId(tId);
+			recepient.setCreatedBy(trans.getCreatedBy());
 		}
 		withdraw(trans);
 		if (recepient != null) {

@@ -15,7 +15,9 @@ import com.bank.interfaces.CustomerAgent;
 import com.bank.interfaces.EmployeeAgent;
 import com.bank.interfaces.UserAgent;
 import com.bank.persistence.util.PersistenceObj;
+import com.bank.pojo.Event;
 import com.bank.util.LogHandler;
+import com.bank.util.TimeUtil;
 
 public class AuthServices {
 
@@ -35,8 +37,10 @@ public class AuthServices {
 			if (attempt < 3) {
 				if (authUser(uId, password)) {
 					setAttempt(uId, 1);
+					log("Login", uId, "Login successful");
 					return true;
 				}
+				log("Login", uId, "Failed login attempt : " + (3-attempt) + " attempts left" );
 				setAttempt(uId, attempt + 1);
 				logger.warning("Incorrect login attempt on user id : " + uId);
 				throw new BankingException("Invalid LoginID or Password");
@@ -245,5 +249,15 @@ public class AuthServices {
 			logger.log(Level.SEVERE, "Couldn't validate customer", exception);
 			throw new BankingException("Cannot validate customer");
 		}
+	}
+	
+	private void log(String eventName, Long userId, String description) {
+		Event event = new Event();
+		event.setUserId(userId);
+		event.setEvent(eventName);
+		event.setTargetUserId(userId);
+		event.setDescription(description);
+		event.setTime(TimeUtil.getTime());
+		EventLogger.log(event);
 	}
 }

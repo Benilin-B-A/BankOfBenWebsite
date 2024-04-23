@@ -14,6 +14,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.bank.services.AdminServices;
+import com.bank.services.CustomerServices;
+import com.bank.services.EmployeeServices;
 import com.bank.util.LogHandler;
 
 public class ControllerFilter implements Filter {
@@ -31,10 +34,13 @@ public class ControllerFilter implements Filter {
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
+		
 
 		HttpServletRequest req = (HttpServletRequest) request;
 		HttpServletResponse res = (HttpServletResponse) response;
 
+		System.out.println(req.getRequestURL());
+		
 		setNoCache(res);
 
 		String path = req.getPathInfo();
@@ -76,7 +82,7 @@ public class ControllerFilter implements Filter {
 					String newPin = req.getParameter("newPin");
 					String reNewPin = req.getParameter("reNewPin");
 					String oldPin = req.getParameter("oldPin");
-					if (newPin.equals(reNewPin) ) {
+					if (newPin.equals(reNewPin)) {
 						if (!newPin.equals(oldPin)) {
 							chain.doFilter(req, res);
 						} else {
@@ -94,14 +100,14 @@ public class ControllerFilter implements Filter {
 				}
 			}
 			break;
-			
+
 		case "/setPin":
 			if (validateSession(req, res)) {
 				String newPin = request.getParameter("newPin");
 				String reNewPin = request.getParameter("reNewPin");
-				if(newPin.equals(reNewPin)) {
+				if (newPin.equals(reNewPin)) {
 					chain.doFilter(request, response);
-				}else {
+				} else {
 					req.setAttribute("errorMessage", "Entered pin doesn't match");
 					req.getRequestDispatcher("/WEB-INF/jsp/setPin.jsp").forward(req, res);
 				}
@@ -109,7 +115,15 @@ public class ControllerFilter implements Filter {
 			break;
 
 		default:
-			if (validateSession(req, res)) {
+			String auth = req.getHeader("authenticationKey");
+			System.out.println(auth);
+			if (auth != null) {
+				if (auth.equals("1234567890")) {
+					setObject(req);
+					req.setAttribute("type", "api");
+					chain.doFilter(request, response);
+				}
+			} else if (validateSession(req, res)) {
 				chain.doFilter(request, response);
 			}
 		}
@@ -135,6 +149,27 @@ public class ControllerFilter implements Filter {
 			return false;
 		}
 		return true;
+	}
+
+	private void setObject(HttpServletRequest request) {
+		String level = request.getHeader("authorizationLevel");
+		Long userId = Long.parseLong(request.getHeader("userId"));
+		if (level != null && userId != null) {
+			if (level.equals("1")) {
+				CustomerServices user = new CustomerServices();
+				user.setUserId(userId);
+				request.getSession().setAttribute("user",user);
+			} else if (level.equals("2")) {
+				EmployeeServices user = new EmployeeServices();
+				user.setUserId(userId);
+				request.getSession().setAttribute("user",user);
+			} else {
+				AdminServices user = new AdminServices();
+				user.setUserId(userId);
+				request.getSession().setAttribute("user",user);
+				System.out.println("here---------------------------");
+			}
+		}
 	}
 
 }

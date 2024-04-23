@@ -47,12 +47,12 @@ public class AdminServices {
 
 	public void withdraw(long accNum, long amount) throws BankingException {
 		UserServices.withdraw(accNum, amount, this.userId);
-		log("Withdraw", UserServices.getCustomerId(accNum), "Money withdrawn from bank");
+		log("Withdrawl", UserServices.getCustomerId(accNum), "Money withdrawn from bank in account number : " + accNum);
 	}
 
 	public void deposit(long accNum, long amount) throws BankingException {
 		UserServices.deposit(accNum, amount, this.userId);
-		log("Deposit", UserServices.getCustomerId(accNum), "Money deposited in bank");
+		log("Deposit", UserServices.getCustomerId(accNum), "Money deposited in bank account number : " + accNum);
 	}
 
 	public void transfer(Transaction trans, long accNum, boolean withinBank) throws BankingException {
@@ -64,15 +64,14 @@ public class AdminServices {
 		if(withinBank) {
 			str = "Money transfered within bank to account number :";
 		}else {
-			str = "Money transfered  outside bank to account number :";
+			str = "Money transfered outside bank to account number :";
 		}
 		log("Money transfer", UserServices.getCustomerId(accNum),str + trans.getTransactionAccountNumber());
 	}
 
 	public void changePassword(String oldPass, String newPass) throws BankingException {
 		UserServices.changePassword(userId, oldPass, newPass);
-		log("Password changed", this.userId,
-				"Password changed");
+		log("Password changed", this.userId,"Password changed");
 	}
 
 	public JSONObject getAccountStatement(long accNum) throws BankingException {

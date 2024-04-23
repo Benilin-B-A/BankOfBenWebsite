@@ -331,8 +331,8 @@
 						
 				</div> <br><br>	
 					
-							
 	</div>
+	
 	<%}else if(tab.equals("updateCustomer")){%>
 		
 		<div class="buttonContainer">
@@ -346,7 +346,7 @@
 	<br><br><br><br><br>
 
 	<%	
-		JSONObject customer =  (JSONObject) request.getAttribute("customerDetails"); 
+		JSONObject customer =  (JSONObject) request.getAttribute("customerDetails");
 		if (customer!=null){
 	%>
 	
