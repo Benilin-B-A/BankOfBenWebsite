@@ -26,6 +26,10 @@
 
 <body>
 
+	<div class="bContainer">
+	
+	<div class="bContainer">
+		
 		<%Object user = request.getSession().getAttribute("user");%>
 		
 		<jsp:include page="header.jsp" />
@@ -61,12 +65,12 @@
 		
 		<form action="<%=request.getContextPath()%>/app/customerDetails" method="get">
 			<input type="text" placeholder="Customer ID" name="customerID" required
-				pattern="^[0-9]+$" title="Enter valid Customer ID">
+				pattern="^[1-9]{1}[0-9]{0,15}$" title="Enter valid Customer ID">
 			<button type="submit" class="button-2">View</button>
 		</form>
 	</div>
 
-	<br> <br> <br><br>
+	<br>
 
 	<%	
 		JSONObject customer =  (JSONObject) request.getAttribute("customerDetails"); 
@@ -189,10 +193,10 @@
 					<button type="submit" class="button-2">View Accounts</button>
 				</form>
 								
-				<form action="<%=request.getContextPath()%>/app/updateCustomer">
+				<%-- <form action="<%=request.getContextPath()%>/app/updateCustomer">
 					<input type="hidden" name="customerID" value="<%=customer.get("ID")%>">
 					<button type="submit" class="button-2">Update</button>
-				</form>
+				</form> --%>
 				
 				</div>
 								
@@ -220,8 +224,6 @@
 		
 	</div>
 	
-	<br><br><br><br>
-	
 			<div class="columnBodyContainer">
 
 				<div class="transactionContainer loginFormPadding">
@@ -233,22 +235,23 @@
 								<tr>
 									<td class="font3" style="width:40%">Name</td>
 									<td class="font2" ><input placeholder="First Name" type="text" name="name" required
-										pattern="^[a-zA-Z]+$" title="Name cannot contain any numbers or special characters"/></td>
+										pattern="^[a-zA-Z]{1,20}$" title="Name cannot contain any numbers or special characters"/></td>
 
 									<td class="font3" >D.O.B</td>
-									<td class="font2" ><input placeholder="YYYY-MM-DD" type="date" name="dOB" required/></td>
+									<td class="font2" ><input placeholder="YYYY-MM-DD" type="date" name="dOB" required
+									min='1920-01-01' max='2020-12-31'/></td>
 								</tr>
 									
 								<tr>
 									<td></td>
 									<td class="font2" ><input placeholder="Last Name" type="text" name="lName" required
-										pattern="^[a-zA-Z]+$" title="Name cannot contain any numbers or special characters"/></td>
+										pattern="^[a-z A-Z]{1,20}$" title="Name cannot contain any numbers or special characters"/></td>
 								</tr>
 								
 								<tr>
 									<td class="font3">Phone</td>
 									<td class="font2"><input placeholder="xxxxxxxxxx" type="text" name="phone" required
-										pattern="^[7-9]{1}[0-9]{9}$" title="ENter valid Phone number"/></td>
+										pattern="^[7-9]{1}[0-9]{9}$" title="Enter valid Phone number"/></td>
 
 									<td class="font3">E-Mail</td>
 									<td class="font2"><input placeholder="xxx@yyy.com" type="email" name="eMail" required/></td>
@@ -266,27 +269,28 @@
 								</tr>
 								<tr>
 									<td class="font3">Address</td>
-									<td><input placeholder="Line 1" type="text" name="addressL1" required/></td>
+									<td><input placeholder="Line 1" type="text" name="addressL1" required
+									pattern="^[a-zA-Z0-9 ]{1,20}$" title="Enter valid address"/></td>
 									
 									<td class="font3">Pincode</td>
 									<td><input type="text" name="pincode" pattern="^[0-9]+$" title="Enter valid PinCode"
-											required/></td>
+											required pattern="^[0-9]{6}$" title="Enter valid PinCode"/></td>
 								</tr>
 								
 								<tr>
 									<td class="font3"></td>
-									<td><input placeholder="Line 2" type="text" name="addressL2" required/></td>
-									
+									<td><input placeholder="Line 2" type="text" name="addressL2" required
+									pattern="^[a-zA-Z0-9 ]{1,20}$" title="Enter valid address"/></td>
 								</tr>
 															
 								<tr>
 									<td class="font3">Aadhar Number</td>
-									<td class="font2"><input placeholder="xxxx xxxx xxxx" type="number" name="aadharNumber" 
+									<td class="font2"><input placeholder="xxxx xxxx xxxx" type="text" name="aadharNumber" 
 										pattern="^[0-9]{12}$" title="Enter valid Aadhar Number" required></td>
 
 									<td class="font3" style="width:40%">Pan Number</td>
 									<td class="font2" style="width:40%"><input placeholder="XXXXXYYYY" type="text" name="panNumber" 
-									pattern="^[0-9A-Z]+$" title="Enter valid PAN number" required/></td>
+									pattern="^[A-Z]{5}[0-9]{4}[A-Z]$" title="Enter valid PAN number" required/></td>
 								</tr>
 															
 								<tr>
@@ -475,7 +479,12 @@
 	</div>
 	
 	<%}	%>
-									
+		
+		</div>
+								
+	
+	</div>
+			
 </body>
 
 </html>

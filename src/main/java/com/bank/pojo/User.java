@@ -17,10 +17,16 @@ public abstract class User {
 	protected long createdOn;
 	protected long modifiedOn;
 	protected long modifiedBy;
-	
-	
-	
-	
+	protected long aadharNumber;
+
+	public long getAadharNum() {
+		return aadharNumber;
+	}
+
+	public void setAadharNum(long aadharNum) {
+		this.aadharNumber = aadharNum;
+	}
+
 	public long getCreatedOn() {
 		return createdOn;
 	}
@@ -49,15 +55,15 @@ public abstract class User {
 		return ("Name : " + this.name + "\nDOB : " + this.dOB + "\nGender : " + this.gender + "\nAddress : "
 				+ this.eMail + "\nPhone : " + this.phone + "\nStatus : " + this.userStatus + "\nAddress : ");
 	}
-	
+
 	public void setLevel(UserLevel level) {
 		userLevel = level;
 	}
-	
+
 	public UserLevel getLevel() {
 		return this.userLevel;
 	}
-	
+
 	public long getID() {
 		return userId;
 	}

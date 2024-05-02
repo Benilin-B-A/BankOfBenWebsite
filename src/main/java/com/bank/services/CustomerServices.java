@@ -1,6 +1,8 @@
 package com.bank.services;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -15,7 +17,6 @@ import com.bank.exceptions.PersistenceException;
 import com.bank.interfaces.AccountsAgent;
 import com.bank.interfaces.CustomerAgent;
 import com.bank.persistence.util.PersistenceObj;
-import com.bank.pojo.Account;
 import com.bank.pojo.Event;
 import com.bank.pojo.Transaction;
 import com.bank.util.LogHandler;
@@ -26,11 +27,26 @@ public class CustomerServices {
 
 	private String name;
 	private long userId;
+	public long getUserId() {
+		return userId;
+	}
+
 	private boolean isPinSet;
-	private Account currentAccount;
 	
+	private long primaryAcc;
+	
+//	private Account currentAccount;
+	
+	public long getPrimaryAcc() {
+		return primaryAcc;
+	}
+
+	public void setPrimaryAcc(long primaryAcc) {
+		this.primaryAcc = primaryAcc;
+	}
+
 	public long getAccNum() {
-		return currentAccount.getAccNum();
+		return this.primaryAcc;
 	}
 
 	static AccountCache accCache = AccountCache.getInstance();
@@ -56,42 +72,32 @@ public class CustomerServices {
 		this.userId = userId;
 	}
 
-	public void setCurrentAccount(Account account) {
-		this.currentAccount = account;
-	}
-
 	private static AccountsAgent accAgent = PersistenceObj.getAccountsAgent();
 	private static CustomerAgent cusAgent = PersistenceObj.getCustmomerAgent();
 
 	private static Logger logger = LogHandler.getLogger(CustomerServices.class.getName(), "CustomerServices.txt");
 
-	public long getBalance() throws BankingException {
-		long accNum = currentAccount.getAccNum();
-		AuthServices.validateAccount(accNum);
-		return UserServices.getBalance(accNum);
-	}
-
 	public boolean isPrimary(long accNum) {
-		if(accNum == currentAccount.getAccNum()) {
+		if(accNum == primaryAcc) {
 			return true;
 		}
 		return false;
 	}
 	
-	public void withdraw(long amount, String pin) throws BankingException, InvalidInputException {
-		AuthServices.authPin(userId, pin);
-		UserServices.withdraw(currentAccount.getAccNum(), amount, this.userId);
-		log("Withdraw", this.userId, "Money withdrawn from bank");
-	}
+//	public void withdraw(long amount, String pin) throws BankingException, InvalidInputException {
+//		AuthServices.isValidPin(userId, pin);
+//		UserServices.withdraw(primaryAcc, amount, this.userId);
+//		log("Withdraw", this.userId, "Money withdrawn from bank");
+//	}
 
-	public void deposit(long amount) throws BankingException {
-		UserServices.deposit(currentAccount.getAccNum(), amount, this.userId);
-		log("Deposit", this.userId, "Money deposited in bank");
-	}
+//	public void deposit(long amount) throws BankingException {
+//		UserServices.deposit(primaryAcc, amount, this.userId);
+//		log("Deposit", this.userId, "Money deposited in bank");
+//	}
 
 	public void transfer(Transaction transaction, String pin, boolean withinBank)
 			throws BankingException{
-		AuthServices.authPin(userId, pin);
+		AuthServices.isValidPin(userId, pin);
 		transaction.setCreatedBy(this.userId);
 		UserServices.transferMoney(transaction, withinBank);
 		String str = null;
@@ -111,7 +117,7 @@ public class CustomerServices {
 
 	public void changePin(String oldPin, String newPin)
 			throws BankingException, InvalidInputException {
-		AuthServices.authPin(userId, oldPin);
+		AuthServices.isValidPin(userId, oldPin);
 		setPin(newPin);
 		log("T-PIN changed", this.userId,
 				"T-PIN changed");
@@ -141,8 +147,8 @@ public class CustomerServices {
 	public void switchAccount(long accoNum) throws BankingException {
 		validateSwitch(accoNum);
 		try {
-			accAgent.switchPrimary(userId, currentAccount.getAccNum(), accoNum);
-			currentAccount = accCache.get(accoNum);
+			accAgent.switchPrimary(userId, primaryAcc, accoNum);
+			primaryAcc = accoNum;
 			log("Primary account switched", this.userId,
 					"Primary account switched");
 		} catch (PersistenceException exception) {
@@ -152,17 +158,17 @@ public class CustomerServices {
 	}
 
 	private boolean validateSwitch(long accNum) throws BankingException {
-		if (!(accNum == currentAccount.getAccNum())) {
+		if (!(accNum == primaryAcc)) {
 			if (UserServices.getCustomerId(accNum) == userId) {
 				return true;
 			}
 			throw new BankingException("No such account");
 		}
-		throw new BankingException("The entered account is already the primary account");
+		throw new BankingException("Account number " + accNum + " is already primary");
 	}
 
 	public JSONObject getAccount() throws BankingException {
-		return JSONAdapter.objToJSONObject(currentAccount);
+		return UserServices.getAccountDetails(primaryAcc);
 	}
 
 	public JSONObject getCustomerDetails() throws BankingException {
@@ -171,12 +177,31 @@ public class CustomerServices {
 
 	public JSONObject getAccounts() throws BankingException {
 		JSONObject accs = UserServices.getAccounts(userId);
-		accs.remove(String.valueOf(currentAccount.getAccNum()));
+		accs.remove(String.valueOf(primaryAcc));
 		return accs;
 	}
 
 	public List<Long> getAllAcc() throws BankingException {
-		return accsCache.get(userId);
+		try {
+			return accAgent.getAccountList(this.userId);
+		} catch (PersistenceException exception) {
+			logger.log(Level.SEVERE, "Error in fetching accounts", exception);
+			throw new BankingException("Something went wrong...Try again");
+		}
+		//		return accsCache.get(userId);
+	}
+	
+	public List<Long> getActiveAccounts() throws BankingException{
+		JSONObject accs = UserServices.getAccounts(userId);
+		List<Long> activeAccList = new ArrayList<>();
+		Set<String> keySet = accs.keySet();
+		for(String acc : keySet) {
+			int status = accs.getJSONObject(acc).getJSONObject("status").getInt("state");
+			if(status == 1) {
+				activeAccList.add(accs.getJSONObject(acc).getLong("accNum"));
+			}
+		}
+		return activeAccList;
 	}
 
 	private void log(String eventName, Long targetId, String description) {

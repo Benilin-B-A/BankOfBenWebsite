@@ -124,8 +124,7 @@ public class TransacOperations implements TransacAgent {
 	private static void addCustomer(Connection connection, Customer customer, long id) throws SQLException {
 		try (PreparedStatement st = connection.prepareStatement(CustomerTableQuery.addCustomer)) {
 			st.setLong(1, id);
-			st.setLong(2, customer.getAadharNum());
-			st.setString(3, customer.getPanNum());
+			st.setString(2, customer.getPanNum());
 			st.execute();
 		}
 	}
@@ -151,6 +150,7 @@ public class TransacOperations implements TransacAgent {
 			statement.setString(8, password);
 			statement.setLong(9,usr.getCreatedOn());
 			statement.setLong(10, usr.getModifiedBy());
+			statement.setLong(11, usr.getAadharNum());
 			statement.executeUpdate();
 			try (ResultSet set = statement.getGeneratedKeys()) {
 				set.next();

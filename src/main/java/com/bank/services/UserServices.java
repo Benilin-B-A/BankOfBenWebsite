@@ -15,6 +15,7 @@ import com.bank.exceptions.BankingException;
 import com.bank.exceptions.InvalidInputException;
 import com.bank.exceptions.PersistenceException;
 import com.bank.interfaces.AccountsAgent;
+import com.bank.interfaces.CustomerAgent;
 import com.bank.interfaces.EmployeeAgent;
 import com.bank.interfaces.TransacAgent;
 import com.bank.interfaces.TransactionAgent;
@@ -33,12 +34,12 @@ public abstract class UserServices {
 	private static AccountsAgent accAgent = PersistenceObj.getAccountsAgent();
 	private static TransactionAgent tranAgent = PersistenceObj.getTransactionAgent();
 	private static UserAgent userAgent = PersistenceObj.getUserAgent();
-//	private static CustomerAgent cusAgent = PersistenceObj.getCustmomerAgent();
+	private static CustomerAgent cusAgent = PersistenceObj.getCustmomerAgent();
 	private static EmployeeAgent empAgent = PersistenceObj.getEmployeeAgent();
 	private static TransacAgent trAgnet = PersistenceObj.getTransacAgent();
 
 	private static Logger logger = LogHandler.getLogger(UserServices.class.getName(), "UserServices.txt");
-	
+
 	static AccountCache accCache = AccountCache.getInstance();
 	static ProfileCache proCache = ProfileCache.getInstance();
 	static CustomerAccountsCache accsCache = CustomerAccountsCache.getInstance();
@@ -62,7 +63,7 @@ public abstract class UserServices {
 	}
 
 	static void withdraw(long accNum, long amount, long empID) throws BankingException {
-		AuthServices.validateAccount(accNum);
+		AuthServices.isValidAccount(accNum);
 		Transaction trans = new Transaction();
 		trans.setAccNumber(accNum);
 		trans.setCreatedBy(empID);
@@ -84,7 +85,7 @@ public abstract class UserServices {
 	}
 
 	static void deposit(long accNum, long amount, long empId) throws BankingException {
-		AuthServices.validateAccount(accNum);
+		AuthServices.isValidAccount(accNum);
 		Transaction trans = new Transaction();
 		trans.setAccNumber(accNum);
 		trans.setCreatedBy(empId);
@@ -103,14 +104,15 @@ public abstract class UserServices {
 		trans.setClosingBal(bal + amount);
 		doTransaction(trans);
 	}
-	
+
 	private static void doTransaction(Transaction trans) throws BankingException {
 		try {
+			AuthServices.isValidAccount(trans.getAccountNumber());
 			trans.setCreatedOn(TimeUtil.getTime());
 			tranAgent.doTransaction(trans);
 		} catch (PersistenceException exception) {
 			logger.log(Level.SEVERE, "Error in deposit", exception);
-			throw new BankingException("cannot complete deposit", exception);
+			throw new BankingException("Cannot complete deposit", exception);
 		}
 	}
 
@@ -126,7 +128,10 @@ public abstract class UserServices {
 		Transaction recepient = null;
 		if (withinBank) {
 			long accNum = trans.getTransAccNum();
-			AuthServices.validateAccount(accNum);
+			if (accNum == senderAccNum) {
+				throw new BankingException("Cannot transfer money to the same account");
+			}
+			AuthServices.isValidAccount(accNum);
 			recepient = new Transaction();
 			recepient.setCustomerId(getCustomerId(accNum));
 			recepient.setAccNumber(accNum);
@@ -149,42 +154,57 @@ public abstract class UserServices {
 	}
 
 	static boolean changePassword(long userId, String oldPassword, String newPassword) throws BankingException {
-		boolean isValid = AuthServices.authUser(userId, oldPassword);
 		try {
-			if(isValid) {
+			boolean isValid = AuthServices.isValidPassword(userId, oldPassword);
+			if (isValid) {
+				Long lastChange = userAgent.getLastPasswordChange(userId);
+				if (lastChange != null) {
+					long timeBetween = TimeUtil.getTime() - lastChange;
+					if (timeBetween < 86400000) {
+						throw new BankingException(
+								"Password changes are limited to once every 24 hours... Try again later");
+					}
+				}
 				if (oldPassword.equals(newPassword)) {
-					throw new BankingException("New password cannot be your previous password");
+					throw new BankingException("New password and existing password cannot be the same");
 				}
 				Validator.validatePassword(newPassword);
 				userAgent.changePassword(userId, AuthServices.hashPassword(newPassword));
+				userAgent.updatePasswordChange(userId, TimeUtil.getTime());
 				return true;
 			}
-			throw new BankingException("Invalid Password");
+			throw new BankingException("Incorrect password entered");
 		} catch (PersistenceException exception) {
 			logger.log(Level.SEVERE, "Error in changing password", exception);
-			throw new BankingException("Couldn't change password");
+			throw new BankingException("Something went wrong... Try again later");
 		} catch (InvalidInputException exception) {
-			logger.log(Level.WARNING, "Invalid Password", exception);
-			throw new BankingException("Password must contain minimum of 8 characters including," + "\n*One Uppercase"
-					+ "\n*One special character" + "\n*One number");
+			throw new BankingException("Invalid password format... Try again");
 		}
 	}
-	
+
 	static JSONObject getAccountDetails(long accNum) throws BankingException {
-		AuthServices.validateAccountPresence(accNum);
-		Account acc = accCache.get(accNum);
+		AuthServices.isAccountPresent(accNum);
+//		Account acc = accCache.get(accNum);
+		Account acc;
+		try {
+			acc = accAgent.getAccount(accNum);
+		} catch (PersistenceException exception) {
+			throw new BankingException("Something went wrong... Try again later");
+		}
 		return JSONAdapter.objToJSONObject(acc);
 	}
 
 	static JSONObject getAccountStatement(long accNum, int page) throws BankingException {
 		try {
-			AuthServices.validateAccount(accNum);
+			if (AuthServices.isAccountPresent(accNum)) {
+				AuthServices.isValidAccount(accNum);
+			}
 			int limit = 10;
 			int offset = limit * (page - 1);
 			return tranAgent.getAccountStatement(accNum, limit, offset);
 		} catch (PersistenceException exception) {
 			logger.log(Level.SEVERE, "Couldn't fetch account statement", exception);
-			throw new BankingException("Couldn't fetch account statement", exception);
+			throw new BankingException("Something went wrong... try again later", exception);
 		}
 	}
 
@@ -198,9 +218,18 @@ public abstract class UserServices {
 	}
 
 	static JSONObject getCustomerDetails(long userId) throws BankingException {
-		AuthServices.validateCustomer(userId);
-		Customer customer = proCache.get(userId);
-		return JSONAdapter.objToJSONObject(customer);
+		try {
+			if (AuthServices.isCustomer(userId)) {
+				Customer customer = cusAgent.getCustomer(userId);
+				return JSONAdapter.objToJSONObject(customer);
+			} else {
+				throw new BankingException("No matches found for given Customer ID");
+			}
+		} catch (PersistenceException exception) {
+			logger.log(Level.SEVERE, "Couldn't fetch customer details", exception);
+			throw new BankingException("Something went wrong... Try again later");
+		}
+
 	}
 
 	static JSONObject getEmployeeDetails(long userId) throws BankingException {
@@ -209,7 +238,7 @@ public abstract class UserServices {
 				Employee employee = empAgent.getEmployee(userId);
 				return JSONAdapter.objToJSONObject(employee);
 			}
-			throw new BankingException("Invalid Employee Id");
+			throw new BankingException("No matches found for given Employee ID");
 		} catch (PersistenceException exception) {
 			logger.log(Level.INFO, "Couldn't fetch employee", exception);
 			throw new BankingException("Couldn't fetch employee for userId : " + userId, exception);
@@ -223,6 +252,8 @@ public abstract class UserServices {
 		} catch (InvalidInputException exception) {
 			throw new BankingException("Customer/Account is null");
 		}
+		AuthServices.isAlreadyUser(cus.getAadharNum());
+		AuthServices.isAlreadyCustomer(cus.getPanNum());
 		try {
 			cus.setCreatedOn(TimeUtil.getTime());
 			account.setCreatedOn(TimeUtil.getTime());
@@ -235,12 +266,14 @@ public abstract class UserServices {
 			throw new BankingException("Couldn't add Customer", exception);
 		}
 	}
-	
+
 	public static JSONObject getAccounts(long customerId) throws BankingException {
 		try {
-			AuthServices.validateCustomer(customerId);
-			Map<Long, Account> map = accAgent.getAccounts(customerId);
-			return JSONAdapter.mapToJSON(map);
+			if (AuthServices.isCustomer(customerId)) {
+				Map<Long, Account> map = accAgent.getAccounts(customerId);
+				return JSONAdapter.mapToJSON(map);
+			}
+			throw new BankingException("Invalid Customer ID");
 		} catch (PersistenceException exception) {
 			logger.log(Level.INFO, "Couldn't fetch accounts", exception);
 			throw new BankingException("Couldn't fetch accounts for customer ID : " + customerId, exception);
@@ -272,5 +305,4 @@ public abstract class UserServices {
 		}
 	}
 
-	
 }

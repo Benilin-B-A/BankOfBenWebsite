@@ -18,6 +18,8 @@
 
 <body>
 
+	<div class="bContainer">
+	
 	<jsp:include page="/WEB-INF/jsp/header.jsp" />
 
 	<div class="buttonContainer">
@@ -36,13 +38,13 @@
 	
 	</div>
 
-	<br><br><br><br>
+	<br><br><br>
 
 	<div class="columnBodyContainer">
 		
 		<img src="<%=request.getContextPath()%>/images/Home.svg" alt="Home">
 		
-		<br><br><br><br>
+		<br><br><br>
 		
 		<div class="container detailPadding">
 		
@@ -51,6 +53,8 @@
 			<p class="font1">E-Mail : bankofben@gmail.com</p>
 		
 		</div>
+	
+	</div>
 	
 	</div>
 		

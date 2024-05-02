@@ -25,6 +25,10 @@ public class EmployeeServices {
 
 	private long branchId;
 
+	public long getUserId() {
+		return userId;
+	}
+
 	public void setUserId(long userId) {
 		this.userId = userId;
 	}
@@ -41,7 +45,7 @@ public class EmployeeServices {
 
 	private boolean validateEmpAccess(long accNum) throws BankingException {
 		try {
-			AuthServices.validateAccountPresence(accNum);
+			AuthServices.isAccountPresent(accNum);
 			long brId = accAgent.getBranchId(accNum);
 			if (brId == branchId) {
 				return true;

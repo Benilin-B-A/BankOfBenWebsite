@@ -1,8 +1,6 @@
 package filter;
 
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -14,14 +12,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.bank.exceptions.BankingException;
 import com.bank.services.AdminServices;
+import com.bank.services.AuthServices;
 import com.bank.services.CustomerServices;
 import com.bank.services.EmployeeServices;
-import com.bank.util.LogHandler;
 
-public class ControllerFilter implements Filter {
+public class ApplicationFilter implements Filter {
 
-	private static Logger logger = LogHandler.getLogger(ControllerFilter.class.getName(), "FilterLogs.txt");
+//	private static Logger logger = LogHandler.getLogger(ApplicationFilter.class.getName(), "FilterLogs.txt");
 
 	@Override
 	public void init(FilterConfig arg0) throws ServletException {
@@ -34,16 +33,15 @@ public class ControllerFilter implements Filter {
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
-		
 
 		HttpServletRequest req = (HttpServletRequest) request;
 		HttpServletResponse res = (HttpServletResponse) response;
 
-		System.out.println(req.getRequestURL());
-		
 		setNoCache(res);
 
 		String path = req.getPathInfo();
+
+//		System.out.println(path);
 
 		switch (path) {
 
@@ -115,15 +113,7 @@ public class ControllerFilter implements Filter {
 			break;
 
 		default:
-			String auth = req.getHeader("authenticationKey");
-			System.out.println(auth);
-			if (auth != null) {
-				if (auth.equals("1234567890")) {
-					setObject(req);
-					req.setAttribute("type", "api");
-					chain.doFilter(request, response);
-				}
-			} else if (validateSession(req, res)) {
+			if (validateSession(req, res)) {
 				chain.doFilter(request, response);
 			}
 		}
@@ -136,39 +126,33 @@ public class ControllerFilter implements Filter {
 		httpResponse.setDateHeader("Expires", 0);
 	}
 
-	private boolean validateSession(HttpServletRequest request, HttpServletResponse response) {
+	private boolean validateSession(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
 		HttpSession session = request.getSession();
 		Object obj = session.getAttribute("user");
+		boolean validUser = false;
 		if (obj == null) {
 			request.setAttribute("errorMessage", "Invalid session : Login to continue");
-			try {
-				request.getRequestDispatcher("/WEB-INF/jsp/login.jsp").forward(request, response);
-			} catch (ServletException | IOException exception) {
-				logger.log(Level.SEVERE, "Error in validating session", exception);
-			}
-			return false;
+			request.getRequestDispatcher("/WEB-INF/jsp/login.jsp").forward(request, response);
+		}
+		try {
+			validUser = AuthServices.isValidUser(getUserId(obj));
+		} catch (BankingException e) {
+		}
+		if (!validUser) {
+			request.setAttribute("errorMessage", "User Blocked : Contact BOB authorities to regain access");
+			request.getRequestDispatcher("/WEB-INF/jsp/login.jsp").forward(request, response);
 		}
 		return true;
 	}
 
-	private void setObject(HttpServletRequest request) {
-		String level = request.getHeader("authorizationLevel");
-		Long userId = Long.parseLong(request.getHeader("userId"));
-		if (level != null && userId != null) {
-			if (level.equals("1")) {
-				CustomerServices user = new CustomerServices();
-				user.setUserId(userId);
-				request.getSession().setAttribute("user",user);
-			} else if (level.equals("2")) {
-				EmployeeServices user = new EmployeeServices();
-				user.setUserId(userId);
-				request.getSession().setAttribute("user",user);
-			} else {
-				AdminServices user = new AdminServices();
-				user.setUserId(userId);
-				request.getSession().setAttribute("user",user);
-				System.out.println("here---------------------------");
-			}
+	private long getUserId(Object obj) {
+		if (obj instanceof AdminServices) {
+			return ((AdminServices) obj).getUserId();
+		} else if (obj instanceof EmployeeServices) {
+			return ((EmployeeServices) obj).getUserId();
+		} else {
+			return ((CustomerServices) obj).getUserId();
 		}
 	}
 

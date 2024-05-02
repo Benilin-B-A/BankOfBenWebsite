@@ -14,6 +14,8 @@
 
 <body>
 
+	<div class="bContainer">
+	
 	<jsp:include page="popUpScript.jsp" />
 	
 	<jsp:include page="header.jsp" />
@@ -26,7 +28,7 @@
 	
 	</div>
 	
-	<br><br><br><br><br>
+	<br><br><br><br><br><br><br><br>
 	
 	<div class="columnBodyContainer">
 
@@ -44,8 +46,7 @@
 				
 					<br>
 					
-					<input placeholder="User ID" type="text" pattern="^[0-9]+$" name="userId" min=1
-					 step=1 required title="Enter valid User ID"/><br /><br />
+					<input placeholder="User ID" type="text" pattern="^[1-9]{1}[0-9]{0,15}$" name="userId"required title="Enter valid User ID"/><br /><br />
 					
 					<input placeholder="Password" type="password" name="password" required/><br /><br />
 					
@@ -89,6 +90,8 @@
 	<%
 	}
 	%>
+	
+	</div>
 	
 </body>
 

@@ -1,6 +1,5 @@
-<div class="navPadding">
 
-	<div class="customerNavBarContainer">
+	<div class="customerNavBarContainer navPadding">
 	
 	<%-- <a href="profile"> <img src="<%=request.getContextPath()%>/images/Profile.svg" alt="Profile"></a> --%>
 	
@@ -18,7 +17,6 @@
 	
 	</div>
 
-</div>
 
 <script>
 

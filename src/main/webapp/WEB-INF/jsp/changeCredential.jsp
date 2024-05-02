@@ -16,7 +16,9 @@
 
 <body>
 
-	<jsp:include page="popUpScript.jsp" />
+	<div class="bContainer">
+	
+		<jsp:include page="popUpScript.jsp" />
 
 	<jsp:include page="header.jsp" />
 	
@@ -26,7 +28,9 @@
 		
 	</div>
 	
-	<br><br>
+	<br><br><br><br><br><br>
+	
+	<div class="centerContainer">
 	
 	<div class="columnBodyContainer">
 
@@ -49,25 +53,26 @@
 
 					<div>
 						<input placeholder="New Password" type="password" name="newPassword" required
-								pattern="^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{8,}$"/> 
+							pattern="^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{8,20}$"/> 
 						<br><br>
 					</div>
 					
 					<div>
 						<input placeholder="Re-Enter New Password"  type="password" name="reNewPassword" required
-								pattern="^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{8,}$"/> 
+							pattern="^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{8,20}$"/> 
 						<br>
 					</div>
 					
 					<p class="font4">
-						Password must contain <br>*Atleast 8 characters <br> *One uppercase <br>
+						Password must contain <br>* 8 - 20 characters <br> *One uppercase letter
+						<br> *One lowercase letter <br>
 						*One number<br> *One special character
 					</p>
 					
 					<br>
 
 					<div class="profileButtonContainer">
-						<button type="submit" class="button-2">CONFIRM</button>
+						<button type="submit" class="button-4">CONFIRM</button>
 					</div>
 					
 					<br><br>
@@ -120,6 +125,8 @@
 		
 	</div>
 	
+	</div>
+	
 	<%
 	String message = (String) request.getAttribute("errorMessage");
 	if( message != null) {%>
@@ -129,7 +136,9 @@
 		</div>
 						
 	<%}	%>
-		
+	
+	</div>
+
 </body>
 
 </html>

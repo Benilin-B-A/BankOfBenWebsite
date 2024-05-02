@@ -11,7 +11,7 @@
 <%@page import="java.util.Iterator"%>
 <%@page import="com.bank.services.CustomerServices"%>
 <%@page import="org.json.JSONObject"%>
-
+	
 <!DOCTYPE html>
 
 <html>
@@ -179,7 +179,7 @@
 							<%} %>	
 	
 	</div>
-	<%}else if(accounts !=null){ %>
+	<%}else if(accounts != null){ %>
 	
 	<div class="container">
 	

@@ -65,6 +65,7 @@ public class EmployeeDBAgent implements EmployeeAgent {
 				emp.setPhone(set.getLong(7));
 				emp.setStatus(Status.getStatusByState(set.getInt(8)));
 				emp.setBranchID(set.getLong(9));
+				emp.setAadharNum(set.getLong(10));
 				return emp;
 			}
 		} catch (SQLException exception) {

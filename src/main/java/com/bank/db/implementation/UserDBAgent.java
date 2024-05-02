@@ -134,5 +134,46 @@ public class UserDBAgent implements UserAgent{
 			throw new PersistenceException("Couldn't update status",exception);
 		}
 	}
+
+	@Override
+	public long getLastPasswordChange(long userId) throws PersistenceException {
+		try (Connection connection = connect(); 
+				PreparedStatement st = connection.prepareStatement(UserTableQuery.getLastPasswordChangeTime)){
+			st.setLong(1, userId);
+			try (ResultSet set = st.executeQuery()) {
+				set.next();
+				return set.getLong(1);
+			}
+		} catch (SQLException exception) {
+			throw new PersistenceException("Couldn't fetch last password change time",exception);
+		}
+	}
+
+	@Override
+	public void updatePasswordChange(long userId, long time) throws PersistenceException {
+		try (Connection connection = connect(); 
+				PreparedStatement st = connection.prepareStatement(UserTableQuery.updateLastPasswordChangeTime)){
+			st.setLong(1, time);
+			st.setLong(2, userId);
+			st.execute();
+		} catch (SQLException exception) {
+			throw new PersistenceException("Couldn't update last password change time",exception);
+		}
+		
+	}
+
+	@Override
+	public boolean isAlreadyUser(long aadharNumber) throws PersistenceException {
+		try (Connection connection = connect(); 
+				PreparedStatement st = connection.prepareStatement(UserTableQuery.isAlreadyUser)){
+			st.setLong(1, aadharNumber);
+			try (ResultSet set = st.executeQuery()) {
+				set.next();
+				return set.getBoolean(1);
+			}
+		} catch (SQLException exception) {
+			throw new PersistenceException("Couldn't fetch user existence details",exception);
+		}
+	}
 	
 }

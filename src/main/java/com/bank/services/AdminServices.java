@@ -30,6 +30,10 @@ public class AdminServices {
 
 	protected long userId;
 
+	public long getUserId() {
+		return userId;
+	}
+
 	public void setUserId(long userId) {
 		this.userId = userId;
 	}
@@ -41,7 +45,7 @@ public class AdminServices {
 	private static TransacAgent trAgnet = PersistenceObj.getTransacAgent();
 
 	public long getBalance(long accNum) throws BankingException {
-		AuthServices.validateAccountPresence(accNum);
+		AuthServices.isAccountPresent(accNum);
 		return UserServices.getBalance(accNum);
 	}
 
@@ -56,7 +60,7 @@ public class AdminServices {
 	}
 
 	public void transfer(Transaction trans, long accNum, boolean withinBank) throws BankingException {
-		AuthServices.validateAccount(accNum);
+		AuthServices.isValidAccount(accNum);
 		trans.setAccNumber(accNum);
 		trans.setCreatedBy(this.userId);
 		UserServices.transferMoney(trans, withinBank);
@@ -87,7 +91,7 @@ public class AdminServices {
 	}
 
 	public JSONObject getAccount(long accNum) throws BankingException{
-		AuthServices.validateAccountPresence(accNum);
+		AuthServices.isAccountPresent(accNum);
 		return UserServices.getAccountDetails(accNum);
 	}
 
@@ -103,12 +107,13 @@ public class AdminServices {
 			isBranchPresent(emp.getBranchID());
 			emp.setModifiedBy(this.userId);
 			emp.setCreatedOn(TimeUtil.getTime());
+			AuthServices.isAlreadyUser(emp.getAadharNum());
 			long empId = trAgnet.addEmployee(emp, password);
 			log("New Employee added", empId, "New Employee ID : " + empId);
 			return empId;
 		} catch (PersistenceException exception) {
 			logger.log(Level.SEVERE, "Error in adding Employee", exception);
-			throw new BankingException("Couldn't add Employee");
+			throw new BankingException("Something went wrong... Try again later");
 		}
 	}
 	
@@ -166,12 +171,12 @@ public class AdminServices {
 	}
 
 	public void setStatus(long customerId, Status state) throws BankingException {
-		AuthServices.setStatus( customerId, state);
+		AuthServices.setUserStatus( customerId, state);
 		log("Customer status update", customerId, "Customer status set to " + state);
 	}
 
 	public void setAccountStatus(long accNum, Status status) throws BankingException {
-		AuthServices.validateAccountPresence(accNum);
+		AuthServices.isAccountPresent(accNum);
 		AuthServices.setAccountStatus(accNum, status);
 		log("Account status update", UserServices.getCustomerId(accNum), "Account status set to " + status);
 	}
@@ -186,7 +191,7 @@ public class AdminServices {
 	}
 
 	public void closeAcc(long accNum) throws BankingException {
-		AuthServices.validateAccountPresence(accNum);
+		AuthServices.isAccountPresent(accNum);
 		UserServices.closeAcc(accNum);
 		log("Account closed", UserServices.getCustomerId(accNum), "Account number " + accNum);
 	}

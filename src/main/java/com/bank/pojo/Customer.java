@@ -2,17 +2,8 @@ package com.bank.pojo;
 
 public class Customer extends User {
 
-	private long aadharNumber;
 	private String panNumber;
 	private int numberOfAccounts;
-
-	public long getAadharNum() {
-		return aadharNumber;
-	}
-
-	public void setAadharNum(long aadharNum) {
-		this.aadharNumber = aadharNum;
-	}
 
 	public String getPanNum() {
 		return panNumber;

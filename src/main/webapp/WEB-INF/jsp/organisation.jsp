@@ -25,6 +25,7 @@
 
 <body>
 
+		<div class="bContainer">
 		
 		<jsp:include page="header.jsp" />
 		
@@ -51,12 +52,13 @@
 		
 		<form action="<%=request.getContextPath()%>/app/employeeDetails" method="get">
 			<input type="text" placeholder="Employee ID" name="employeeID" required
-				pattern="^[0-9]+$" title="Enter valid Employee ID">
+				pattern="^[1-9]{1}[0-9]{0,15}$" title="Enter valid Employee ID">
 			<button type="submit" class="button-2">View</button>
 		</form>
+		
 	</div>
 
-	<br> <br> <br><br>
+	<br>
 
 	<%	
 		JSONObject employee =  (JSONObject) request.getAttribute("employeeDetails"); 
@@ -102,6 +104,11 @@
 								<tr>
 									<td class="font3">Email</td>
 									<td class="font2"><%=employee.get("mail")%></td>
+								</tr>
+								
+								<tr>
+									<td class="font3">Aadhar Number</td>
+									<td class="font2"><%=employee.get("aadharNum")%></td>
 								</tr>
 															
 								<tr>
@@ -158,7 +165,6 @@
 								
 								
 				</div>
-				<br>
 				
 				<div class="profileButtonContainer">
 								
@@ -167,9 +173,7 @@
 					<button type="submit" class="button-2">Update</button>
 				</form> --%>
 				
-				</div>
-								
-		<br><br>	
+				</div>	
 	</div>
 	
 	<%} else{ %>
@@ -193,7 +197,7 @@
 		
 	</div>
 	
-	<br><br><br><br>
+	<br>
 	
 			<div class="columnBodyContainer">
 
@@ -206,22 +210,23 @@
 								<tr>
 									<td class="font3" style="width:40%">Name</td>
 									<td class="font2" ><input placeholder="First Name" type="text" name="name" required
-										pattern="^[a-zA-Z]+$" title="Name cannot contain any numbers or special characters"/></td>
+										pattern="^[a-zA-Z]{1,20}$" title="Name cannot contain any numbers or special characters"/></td>
 
 									<td class="font3" >D.O.B</td>
-									<td class="font2" ><input placeholder="YYYY-MM-DD" type="date" name="dOB" required/></td>
+									<td class="font2" ><input placeholder="YYYY-MM-DD" type="date" name="dOB" required
+									min='1970-01-01' max='2000-12-31'/></td>
 								</tr>
 									
 								<tr>
 									<td></td>
 									<td class="font2" ><input placeholder="Last Name" type="text" name="lName" required
-										pattern="^[a-zA-Z]+$" title="Name cannot contain any numbers or special characters"/></td>
+										pattern="^[a-zA-Z]{1,20}$" title="Name cannot contain any numbers or special characters"/></td>
 								</tr>
 								
 								<tr>
 									<td class="font3">Phone</td>
 									<td class="font2"><input placeholder="xxxxxxxxxx" type="text" name="phone" required
-										pattern="^[7-9]{1}[0-9]{9}$" title="ENter valid Phone number"/></td>
+										pattern="^[7-9]{1}[0-9]{9}$" title="Enter valid Phone number"/></td>
 
 									<td class="font3">E-Mail</td>
 									<td class="font2"><input placeholder="xxx@yyy.com" type="email" name="eMail" required/></td>
@@ -236,19 +241,25 @@
   													  <input type="radio" id="other" name="gender" value="Other" required>
 														<label for="other">Other</label>
 									</td>
+									
+									<td class="font3">Aadhar</td>
+									<td class="font2"><input placeholder="xxxx xxxx xxxx" type="text" name="aadharNumber" 
+										pattern="^[0-9]{12}$" title="Enter valid Aadhar Number" required></td>
 								</tr>
 								<tr>
 									<td class="font3">Address</td>
-									<td><input placeholder="Line 1" type="text" name="addressL1" required/></td>
+									<td><input placeholder="Line 1" type="text" name="addressL1" required
+									pattern="^[a-zA-Z0-9 ]{1,20}$" title="Enter valid address"/></td>
 									
 									<td class="font3">Pincode</td>
 									<td><input type="text" name="pincode" pattern="^[0-9]+$" title="Enter valid PinCode"
-											required/></td>
+											required pattern="^[0-9]{6}$" title="Enter valid PinCode"/></td>
 								</tr>
 								
 								<tr>
 									<td class="font3"></td>
-									<td><input placeholder="Line 2" type="text" name="addressL2" required/></td>
+									<td><input placeholder="Line 2" type="text" name="addressL2" required
+									pattern="^[a-zA-Z0-9 ]{1,20}$" title="Enter valid address"/></td>
 									
 								</tr>
 															
@@ -288,137 +299,12 @@
 							
 						</form>
 						
-				</div> <br><br>	
-					
-							
-	</div>
-	
-	<%}else if(tab.equals("updateEmployee")){%>
-		
-		<div class="buttonContainer">
-		
-		<a href="<%=request.getContextPath()%>/app/organisation" class="link font1">
-				<button class="button-2">Cancel</button>
-		</a>
-		
-	</div>
-	
-	<br><br><br><br><br>
-
-	<%	
-		JSONObject customer =  (JSONObject) request.getAttribute("customerDetails"); 
-		if (customer!=null){
-	%>
-	
-	<div class="columnBodyContainer">
-
-				<div class="transactionContainer loginFormPadding">
-				
-					<form action="updateCustomer" class="innerLoginFormContainer" method="post">
-					
-					<table class="table-format2">
-						
-								<tr>
-									<td class="font3">Customer ID</td>
-									<td class="font2"><%=customer.get("ID")%></td>
-								</tr>
-								
-								<tr>
-									<td class="font3">Name</td>
-									<td class="font2">
-									<input placeholder="<%=customer.get("name")%>" type="text" name="name" required
-										pattern="^[a-zA-Z]+$" title="Name cannot contain any numbers or special characters"/>
-									</td>
-								</tr>
-															
-								<tr>
-									<td class="font3" >D.O.B</td>
-									<td class="font2" ><input placeholder="YYYY-MM-DD" type="date" name="dOB" required/></td>
-								</tr>
-								
-								<tr>
-									<td class="font3">Gender</td>
-									<td class="font2"><%=customer.get("gender")%></td>
-								</tr>
-															
-								<tr>
-									<td class="font3">Phone</td>
-									<td class="font2"><input placeholder="<%=customer.get("phone")%>" type="text" name="phone" required
-										pattern="^[7-9]{1}[0-9]{9}$" title="ENter valid Phone number"/></td>
-								</tr>
-															
-								<tr>
-									<td class="font3">Email</td>
-									<td class="font2"><input placeholder="<%=customer.get("mail")%>" type="email" name="eMail" required/></td>
-								</tr>
-															
-								<tr>
-									<td class="font3">Address</td>
-									<td><input placeholder="<%=customer.get("address")%>" type="text" name="addressL1" required/></td>
-								</tr>
-															
-								<tr>
-									<td class="font3">Aadhar Number</td>
-									<td class="font2"><input placeholder="<%=customer.get("aadharNum")%>" type="number" name="aadharNumber" 
-										pattern="^[0-9]{12}$" title="Enter valid Aadhar Number" required></td>
-								</tr>
-															
-								<tr>
-									<td class="font3">Pan Number</td>
-									<td class="font2"><input placeholder="<%=customer.get("panNum")%>" type="text" name="panNumber" 
-									pattern="^[0-9A-Z]+$" title="Enter valid PAN number" required/></td>
-								</tr>
-															
-								<tr>
-									<td class="font3">No. Of Accounts</td>
-									<td class="font2"><%=customer.get("noOfAcc")%></td>
-								</tr>
-								
-								<tr>
-									<td class="font3">Status</td>
-									<td class="font2">
-							<%
-							JSONObject statusObj = customer.getJSONObject("status");
-							int status = statusObj.getInt("state");
-							if(status == 1){%>
-								Active
-								
-							<%} else if(status ==2) {%>
-								Inactive
-							
-							<%} else{%>
-								Blocked
-							
-							<%} %>
-								</td>
-								
-								
-								</tr>
-								</table>
-						
-								
-							<div class="profileButtonContainer">
-							
-							<button type="submit" class="button-2">Submit</button>
-							
-							</div>	
-							
-							<br>
-							
-					
-					</form>
-	
-							
-								
-								
 				</div>
-				<br>
-				
-		<br><br>	
+					
+							
 	</div>
-		
-		
-	<%}}
+	
+	<%}
 	String msg = (String) request.getAttribute("successMessage");
 		if( msg != null) {%>
 				
@@ -435,6 +321,8 @@
 	</div>
 	
 	<%}	%>
+		
+		</div>
 									
 </body>
 

@@ -1,3 +1,4 @@
+<%@page import="java.util.List"%>
 <%@page import="com.bank.services.EmployeeServices"%>
 <%@page import="com.mysql.cj.xdevapi.JsonArray"%>
 <%@page import="com.bank.services.CustomerServices"%>
@@ -24,6 +25,8 @@
 
 <body>
 
+	<div class="bContainer">
+	
 	<%Object user = request.getSession().getAttribute("user");%>
 	
 	<jsp:include page="popUpScript.jsp" />
@@ -50,7 +53,7 @@
 	
 		<form action="<%=request.getContextPath()%>/app/statement" method="get">
 			<input type="text" placeholder="Account Number" name="accountNumber" min=1 step=1 required
-				pattern="^[0-9]+$" title="Enter valid account number">
+				pattern="^[1-9]{1}[0-9]{0,15}$" title="Enter valid account number">
 			<button type="submit" class="button-2">View</button>
 		</form>
 		
@@ -63,12 +66,50 @@
 	}
 	if(statements != null && statements.length()!=0){
 		Object obj = request.getSession().getAttribute("user");
-		Long accNum = Long.parseLong((String)request.getAttribute("accNum"));
+		Long accNum = (Long) request.getAttribute("accNum");
 	%>
+	
+	
+	<%if(user instanceof CustomerServices){ %>
+	
+		<br>
+				
+					<form action="statement">
+
+					<label for="accDropDown" class="font3">Account Number : </label>
+					
+					<select id="accDropDown" name="accountNum">
+									
+						<%List<Long> list = (List<Long>) request.getAttribute("accList");
+							for(int i=0;i<list.size();i++){
+								Long accountNum = list.get(i);
+							if(accountNum == request.getAttribute("accNum")){%>
+								
+								<option value="<%=accountNum%>" selected><%=accountNum%></option>
+							<%}else{ %>
+							
+  				 	 		<option value="<%=accountNum%>"><%=accountNum%></option>
+    					
+    					 <%} }%>
+ 					</select>
+ 					
+ 					<button type="submit" class="button-2">View</button>
+					
+					</form>
+		
+		<br>
+	
+	<% } else {%>
+	
+	<br>
 	
 	<p class="font2">Account Number : <%=accNum%></p>
 	
-	<div>
+	<br>
+	
+	<%} %>
+	
+	<div class="columnBodyContainer">
 		
 		<table class="table-format1">
 
@@ -148,7 +189,32 @@
 			
 		if(user instanceof CustomerServices){%>
 		
-		<br><br><br>
+		<br>
+				
+					<form action="statement">
+
+					<label for="accDropDown" class="font3">Account Number : </label>
+					
+					<select id="accDropDown" name="accountNum">
+									
+						<%List<Long> list = (List<Long>) request.getAttribute("accList");
+							for(int i=0;i<list.size();i++){
+								Long accountNum = list.get(i);
+							if(accountNum == request.getAttribute("accNum")){%>
+								
+								<option value="<%=accountNum%>" selected><%=accountNum%></option>
+							<%}else{ %>
+							
+  				 	 		<option value="<%=accountNum%>"><%=accountNum%></option>
+    					
+    					 <%} }%>
+ 					</select>
+ 					
+ 					<button type="submit" class="button-2">View</button>
+					
+					</form>
+		
+		<br><br><br><br><br>
 			
 		<div class="columnBodyContainer">
 			
@@ -180,6 +246,8 @@
 	</div>
 	
 	<%}	%>
+	
+	</div>
 
 </body>
 

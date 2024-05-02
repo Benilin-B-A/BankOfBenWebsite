@@ -57,7 +57,7 @@ public class CustomerDBAgent implements CustomerAgent {
 	}
 
 	@Override
-	public int getTpinAttempts(long customerId) throws PersistenceException {
+	public int getTPinAttempts(long customerId) throws PersistenceException {
 		try (Connection connection = connect(); 
 				PreparedStatement st = connection.prepareStatement(CustomerTableQuery.getAttempts)){
 			st.setLong(1, customerId);
@@ -71,7 +71,7 @@ public class CustomerDBAgent implements CustomerAgent {
 	}
 
 	@Override
-	public void setTpinAttempts(long customerId, int attempt) throws PersistenceException {
+	public void setTPinAttempts(long customerId, int attempt) throws PersistenceException {
 		try (Connection connection = connect(); 
 				PreparedStatement st = connection.prepareStatement(CustomerTableQuery.setAttempts)){
 			st.setInt(1, attempt);
@@ -120,6 +120,20 @@ public class CustomerDBAgent implements CustomerAgent {
 			}
 		} catch (SQLException exception) {
 			throw new PersistenceException("Error in checking customer presence", exception);
+		}
+	}
+
+	@Override
+	public boolean isAlreadyCustomer(String panNum) throws PersistenceException {
+		try (Connection connection = connect(); 
+				PreparedStatement st = connection.prepareStatement(CustomerTableQuery.isAlreadyCustomer)){
+			st.setString(1, panNum);
+			try (ResultSet set = st.executeQuery()) {
+				set.next();
+				return set.getBoolean(1);
+			}
+		} catch (SQLException exception) {
+			throw new PersistenceException("Couldn't fetch customer existence details",exception);
 		}
 	}
 

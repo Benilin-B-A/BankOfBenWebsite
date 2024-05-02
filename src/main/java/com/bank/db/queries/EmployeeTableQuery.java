@@ -6,7 +6,7 @@ public class EmployeeTableQuery {
 
 	public static String addEmployee = "insert into Employee(ID,BRANCH_ID) values(?,?)";
 	
-	public static String getEmployeeProfile = "select User.ID,NAME,DOB, GENDER, ADDRESS, EMAIL, PHONE, USER_STATE, BRANCH_ID from Employee "
+	public static String getEmployeeProfile = "select User.ID,NAME,DOB, GENDER, ADDRESS, EMAIL, PHONE, USER_STATE, BRANCH_ID, AADHAR_NUMBER from Employee "
 			+ "inner join User on User.ID = Employee.ID where Employee.ID = ?";
 
 	public static String isEmployeePresent = "select exists(select * from Employee where ID = ?)";

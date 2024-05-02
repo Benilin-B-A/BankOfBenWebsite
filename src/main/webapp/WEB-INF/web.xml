@@ -11,24 +11,73 @@
 		<welcome-file>home.jsp</welcome-file>
 	</welcome-file-list>
 
-	<servlet>
-		<servlet-name>controller</servlet-name>
-		<servlet-class>servlet.Controller</servlet-class>
-	</servlet>
+	<session-config>
+		<session-timeout>15</session-timeout>
+	</session-config>
 
-	<servlet-mapping>
-		<servlet-name>controller</servlet-name>
-		<url-pattern>/app/*</url-pattern>
-	</servlet-mapping>
+	<!-- ///////////////////////////////////// FILTER ////////////////////////////////////////////////////////// -->
+
+	<!-- Filter for rate limiting -->
 
 	<filter>
-		<filter-name>controllerFilter</filter-name>
-		<filter-class>filter.ControllerFilter</filter-class>
+		<filter-name>RateLimitingFilter</filter-name>
+		<filter-class>filter.RateLimitingFilter</filter-class>
 	</filter>
 
 	<filter-mapping>
-		<filter-name>controllerFilter</filter-name>
+		<filter-name>RateLimitingFilter</filter-name>
 		<url-pattern>/app/*</url-pattern>
 	</filter-mapping>
+	
+	<!-- Filter for api requests -->
+
+	<filter>
+		<filter-name>APIFilter</filter-name>
+		<filter-class>filter.APIFilter</filter-class>
+	</filter>
+
+	<filter-mapping>
+		<filter-name>APIFilter</filter-name>
+		<url-pattern>/api/v1/*</url-pattern>
+	</filter-mapping>
+
+	<!-- Filter for webapp requests -->
+
+	<filter>
+		<filter-name>ApplicationFilter</filter-name>
+		<filter-class>filter.ApplicationFilter</filter-class>
+	</filter>
+
+	<filter-mapping>
+		<filter-name>ApplicationFilter</filter-name>
+		<url-pattern>/app/*</url-pattern>
+	</filter-mapping>
+
+	<!-- ///////////////////////////////////// SERVLET ////////////////////////////////////////////////////////// -->
+
+	<!-- Servlet for webapp requests -->
+
+	<servlet>
+		<servlet-name>ApplicationServlet</servlet-name>
+		<servlet-class>servlet.ApplicationServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>ApplicationServlet</servlet-name>
+		<url-pattern>/app/*</url-pattern>
+	</servlet-mapping>
+
+
+	<!-- Servlet for api requests -->
+
+	<servlet>
+		<servlet-name>APIServlet</servlet-name>
+		<servlet-class>servlet.APIServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>APIServlet</servlet-name>
+		<url-pattern>/api/v1/*</url-pattern>
+	</servlet-mapping>
 
 </web-app>

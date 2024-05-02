@@ -27,8 +27,8 @@
 
 <body>
 
-	<div>
-	
+<div class="bContainer">
+
 		<jsp:include page="popUpScript.jsp" />
 		
 		<jsp:include page="header.jsp" />
@@ -46,7 +46,6 @@
 		<jsp:include page="adminNav.jsp" />
 	
 	<%} %>
-	</div>  
 	
 	<br><br><br><br>
 
@@ -170,7 +169,10 @@
 			<p class="errorMessage" id="msg"><%=message%></p>
 		</div>
 		<%}	%>
+	
 
+</div>
+	
 </body>
 
 </html>

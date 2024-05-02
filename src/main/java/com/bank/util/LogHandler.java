@@ -12,7 +12,7 @@ public class LogHandler {
 		Logger logger = null;
 		try {
 			logger = Logger.getLogger(name);
-			FileHandler handler = new FileHandler(fileName,true);
+			FileHandler handler = new FileHandler("/home/benlin-pt7278/eclipse-workspace/BankApp/logs/"+fileName, true);
 			Formatter formatter = new SimpleFormatter();
 			handler.setFormatter(formatter);
 			logger.setUseParentHandlers(false);
@@ -23,5 +23,4 @@ public class LogHandler {
 		}
 		return logger;
 	}
-	
 }

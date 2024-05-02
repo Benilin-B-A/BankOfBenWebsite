@@ -20,6 +20,8 @@
 
 <body>
 
+	<div class="bContainer">
+	
 	<jsp:include page="popUpScript.jsp" />
 
 	<jsp:include page="header.jsp" />
@@ -27,13 +29,14 @@
 	<%Object userObj = request.getSession().getAttribute("user");
 	if (userObj instanceof CustomerServices){%>
 	
-		<jsp:include page="customerNav.jsp" />
+	<jsp:include page="customerNav.jsp" />
 	
 	<%}else if(userObj instanceof EmployeeServices){ %>
 	
 	<jsp:include page="employeeNav.jsp" />
 
 <%}else{%>
+
 	<jsp:include page="adminNav.jsp" />
 
 <%} %>
@@ -42,6 +45,8 @@
 
 	<div class="columnBodyContainer loginFormPadding">
 
+		<br>
+		
 		<div class="profileButtonContainer">
 		
 			<%if(!(userObj instanceof CustomerServices)){ %>
@@ -84,8 +89,8 @@
 
 				<div>
 			
-					<input placeholder="Account Number" type="number" name="accNumber" required
-							min=1 step=1/>
+					<input placeholder="Account Number" type="text" name="accNumber" required
+							pattern= "^[1-9]{1}[0-9]{0,15}$" title="Enter valid account number"/>
 					<br> <br>
 			
 				</div>
@@ -94,7 +99,7 @@
 				<div>
 			
 					<input placeholder="Amount" type="number" name="amount" required
-							min=1 step=1/> <br>
+							pattern= "^[1-9]{1}[0-9]{0,15}$" title="Enter valid amount"/> <br>
 					<br>
 			
 				</div>
@@ -122,15 +127,15 @@
 			<div class="innerLoginFormContainer">
 
 				<div>
-					<input placeholder="Account Number" type="number" name="accNumber" required
-							min=1 step=1/>
+					<input placeholder="Account Number" type="text" name="accNumber" required
+							pattern= "^[1-9]{1}[0-9]{0,15}$" title="Enter valid account number"/>
 					<br> <br>
 				</div>
 				
 
 				<div>
-					<input placeholder="Amount" type="number" name="amount" required
-							min=1 step=1/> <br>
+					<input placeholder="Amount" type="text" name="amount" required
+							pattern= "^[1-9]{1}[0-9]{0,15}$" title="Enter valid amount"/> <br>
 					<br>
 				</div>
 				
@@ -155,8 +160,8 @@
 					<%if(!(userObj instanceof CustomerServices)){ %>
 					<div>
 		
-						<input placeholder="Account Number" type="number" name="senderAccNum" required
-							min=1 step=1/> <br>
+						<input placeholder="Account Number" type="text" name="senderAccNum" required
+							pattern= "^[1-9]{1}[0-9]{0,15}$" title="Enter valid account number"/> <br>
 						<br>
 		
 					</div>
@@ -193,16 +198,16 @@
 
 					<div>
 						
-						<input placeholder="Recepient Account Number" type="number" name="accNumber" required
-							min=1 step=1/>
+						<input placeholder="Recepient Account Number" type="text" name="accNumber" required
+							pattern= "^[1-9]{1}[0-9]{0,15}$" title="Enter valid account number"/>
 						<br> <br>
 		
 					</div>
 
 					<div>
 				
-						<input placeholder="Amount" type="number" name="amount" required
-							min=1 step=1/> <br>
+						<input placeholder="Amount" type="text" name="amount" required
+							pattern= "^[1-9]{1}[0-9]{0,15}$" title="Enter valid amount"/> <br>
 						<br>
 				
 					</div>
@@ -213,7 +218,8 @@
 					%>
 				
 					<div>
-						<input placeholder="IFSC" type="text" name="iFSC" required/> <br> <br>
+						<input placeholder="IFSC" type="text" name="iFSC" required
+						pattern="^[0-9A-Z]{5,15}$" title="Enter valid IFSC code"/> <br> <br>
 					</div>
 
 					<input value="outside" type="hidden" name="type" />
@@ -230,7 +236,8 @@
 					%>
 
 					<div>
-						<input placeholder="Description" type="text" name="description" required/>
+						<input placeholder="Description" type="text" name="description" required
+						pattern="^.{1,50}$" title="Description must be within 50 characters"/>
 						<br> <br>
 					</div>
 				
@@ -248,6 +255,8 @@
 						<button type="submit" class="button-2">Send</button>
 					
 					</div>
+					
+					<br><br>
 				
 				</div>
 			
@@ -256,7 +265,7 @@
 			<img src="<%=request.getContextPath()%>/images/Transaction.svg" alt="TransferMoney">
 		
 		</div>
-			
+ 
 		<%} %>
 		
 	</div>
@@ -277,6 +286,8 @@
 	</div>
 	
 	<%}	%>
+	
+	</div>
 
 </body>
 

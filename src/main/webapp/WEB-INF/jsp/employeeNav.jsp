@@ -1,6 +1,4 @@
-<div class="navPadding">
-
-	<div class=" customerNavBarContainer">
+	<div class=" customerNavBarContainer navPadding">
 	
 		<a href="<%=request.getContextPath()%>/app/profile" class="link font1">Profile</a>
 		
@@ -15,9 +13,6 @@
 		<a href="<%=request.getContextPath()%>/app/logout" class="link font1">Logout</a>
 	
 	</div>
-
-
-</div>
 
 <script>
 

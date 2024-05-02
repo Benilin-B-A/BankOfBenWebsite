@@ -22,15 +22,15 @@
 
 <body>
 
+	<div class="bContainer">
+
 	<jsp:include page="popUpScript.jsp" />
 
 	<jsp:include page="header.jsp" />
 	
 	<jsp:include page="customerNav.jsp" />
 	
-	<br><br><br>
-	
-	<div class="bContainer">
+	<br>
 	
 	<div class="bodyContainer infoPadding">
 	
@@ -106,15 +106,13 @@
 			</div>
 			
 		</div>
-		
-		<div class="innerContainer">
 	
-			<div class="accContainer">
 		
 				<%if((request.getAttribute("otherAcc"))!=null) { 
 					JSONObject accs=(JSONObject) request.getAttribute("otherAcc"); 
 					Iterator<String> keys = accs.keys();
 				%>
+			<div class="accContainer">
 				
 				<p class="font2">Other Accounts</p>
 			
@@ -138,32 +136,58 @@
 						</tr>
 
 					</table>
-
+					
+							<%
+							JSONObject statusObject = acc.getJSONObject("status");
+							int stateInt = statusObject.getInt("state");%>
+							<%
+							if(stateInt == 1){%>
+								
 					<form action="<%=request.getContextPath()%>/app/accounts/makePrimary" method="get">
 					 	<input type="hidden" name="newAcc" value="<%=acc.get("accNum")%>">
 						<button class="button-2" >Switch</button>
 					</form>
+								
+							<%} else {%>
+							
+							<p>Inactive/Blocked</p>
+							
+							<%} %>
+							
+							<%-- <%
+							JSONObject statusObj = account.getJSONObject("status");
+							int status = statusObj.getInt("state");
+							if(status == 1){%>
+								Active
+								
+							<%} else if(status ==2) {%>
+								Inactive
+							
+							<%} else{%>
+								Blocked
+							
+							<%} %> --%>
 				
 				</div>
 		
 				<br>
 			
-				<% } 
-				} else{%>
-				
-				<img src="<%=request.getContextPath()%>/images/CreateAccounts.svg" alt="CreateAccount" />
-				
-				<p class="font3">Create a new account by visiting your nearest BOB branch</p>
 			
-				<%}%>	
-
+				<% } %>
+			</div>	
+				<%} else{%>
+				
+			<div class="innerContainer">
+			
+			<img src="<%=request.getContextPath()%>/images/CreateAccounts.svg" alt="CreateAccount" />
+				
+			<p class="font3">Create a new account by visiting your nearest BOB branch</p>
+			
 			</div>
-		
+								
+			<%}%>	
+
 		</div>
-		
-	</div>
-	
-	</div>
 	
 			<%String msg = (String) request.getAttribute("successMessage");
 		
@@ -182,6 +206,7 @@
 			</div>
 			
 			<%}	%>
+	</div>
 	
 </body>
 

@@ -1,5 +1,6 @@
 package com.bank.services;
 
+import java.nio.channels.SelectableChannel;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -9,6 +10,10 @@ import com.bank.cache.AccountCache;
 import com.bank.cache.ProfileCache;
 import com.bank.enums.Status;
 import com.bank.exceptions.BankingException;
+import com.bank.exceptions.InactiveAccountException;
+import com.bank.exceptions.InactiveUserException;
+import com.bank.exceptions.InvalidAccountException;
+import com.bank.exceptions.InvalidUserException;
 import com.bank.exceptions.PersistenceException;
 import com.bank.interfaces.AccountsAgent;
 import com.bank.interfaces.CustomerAgent;
@@ -21,7 +26,7 @@ import com.bank.util.TimeUtil;
 
 public class AuthServices {
 
-	private static Logger logger = LogHandler.getLogger(AuthServices.class.getName(), "AuthServicesLogs.txt");
+	private static Logger logger = LogHandler.getLogger(AuthServices.class.getName(), "AuthenticationLog.txt");
 
 	private static UserAgent userAgent = PersistenceObj.getUserAgent();
 	private static EmployeeAgent empAgent = PersistenceObj.getEmployeeAgent();
@@ -30,109 +35,141 @@ public class AuthServices {
 	static AccountCache accCache = AccountCache.getInstance();
 	static ProfileCache proCache = ProfileCache.getInstance();
 
-	public boolean login(long uId, String password) throws BankingException {
+	/**
+	 * 
+	 * @param userId
+	 * @param password
+	 * @return Returns true if the login is successful
+	 * @throws BankingException
+	 */
+	public boolean login(long userId, String password) throws BankingException {
 		try {
-			validateUser(uId);
-			int attempt = userAgent.getAttempt(uId);
-			if (attempt < 3) {
-				if (authUser(uId, password)) {
-					setAttempt(uId, 1);
-					log("Login", uId, "Login successful");
+			isUserPresent(userId);
+			int attempt = userAgent.getAttempt(userId);
+			if (isValidPassword(userId, password)) {
+				isValidUser(userId);
+				if (attempt < 3) {
+					if (attempt > 1) {
+						setLoginAttempts(userId, 1);
+					}
+					log("Login", userId, "Successful login");
 					return true;
 				}
-				log("Login", uId, "Failed login attempt : " + (3-attempt) + " attempts left" );
-				setAttempt(uId, attempt + 1);
-				logger.warning("Incorrect login attempt on user id : " + uId);
-				throw new BankingException("Invalid LoginID or Password");
+				setUserStatus(userId, Status.BLOCKED);
+				logger.warning("User id : " + userId + "blocked exceeding login attempt limit");
+				throw new BankingException("User blocked for exceeding login attempts : Contact BOB authority");
 			}
-			setStatus(uId, Status.BLOCKED);
-			logger.warning("User id : " + uId + "blocked exceeding login attempt limit");
-			throw new BankingException("User blocked for exceeding login attempts : Contact BOB authority");
+			log("Login", userId, "Failed login attempt : " + (3 - attempt) + " attempts left");
+			setLoginAttempts(userId, attempt + 1);
+			logger.warning("Incorrect login attempt on user id : " + userId);
+			throw new BankingException("Invalid Login ID or Password");
+
+		} catch (InvalidUserException exception) {
+			throw new BankingException("Invalid ID or Password");
+		} catch (InactiveUserException exception) {
+			throw new BankingException("User Blocked/Inactive : Contact BOB authorities to regain access");
 		} catch (PersistenceException exception) {
 			logger.log(Level.SEVERE, "Login error", exception);
 			throw new BankingException("Something went wrong... Try Again Later");
 		}
 	}
 
-	static boolean authUser(long userId, String password) throws BankingException {
-		try {
-			boolean isValid = BCrypt.checkpw(password, userAgent.getPassword(userId));
-			if (isValid) {
-				return true;
-			}
-			return false;
-		} catch (PersistenceException exception) {
-			logger.log(Level.SEVERE, "Error in authenticating user", exception);
-			throw new BankingException("Authentication Error", exception);
+	/**
+	 * @param userId
+	 * @param password
+	 * @return Returns true if the entered password matches the user password
+	 * @throws BankingException
+	 */
+	static boolean isValidPassword(long userId, String password) throws BankingException, PersistenceException {
+		boolean valid = BCrypt.checkpw(password, userAgent.getPassword(userId));
+		if (valid) {
+			return true;
 		}
+		return false;
 	}
 
-	static boolean authPin(long userId, String pin) throws BankingException {
+	/**
+	 * @param userId
+	 * @param pin
+	 * @return Returns true if the entered TPin matches the customer's TPin
+	 * @throws BankingException
+	 */
+	static boolean isValidPin(long userId, String pin) throws BankingException {
 		try {
-			int attempts = cusAgent.getTpinAttempts(userId);
+			int attempts = cusAgent.getTPinAttempts(userId);
 			if (attempts < 3) {
-				if (BCrypt.checkpw(pin, getPin(userId))) {
+				boolean validPIN = BCrypt.checkpw(pin, getTPin(userId));
+				if (validPIN) {
+					if (attempts > 1) {
+						setTPinAttempt(userId, 1);
+					}
 					return true;
 				}
-				setTpinAttempt(userId, attempts + 1);
-				logger.warning("Incorrect tpin attempt on user id : " + userId);
-				throw new BankingException("Incorrect pin : " + (3 - attempts) + " attempt(s) left");
+				setTPinAttempt(userId, attempts + 1);
+				throw new BankingException("Incorrect T-Pin");
 			}
-			setStatus(userId, Status.BLOCKED);
-			logger.warning("User id : " + userId + "blocked exceeding tpin attempt limit");
-			throw new BankingException("User Blocked : Contact nearby BOB authority to regain access");
-		} catch (PersistenceException | BankingException exception) {
-			logger.log(Level.SEVERE, "Error in authenticating user", exception);
-			throw new BankingException("Incorrect T-PIN", exception);
-		}
-	}
-
-	private static String getPin(long customerId) throws BankingException {
-		try {
-			return cusAgent.getPin(customerId);
+			setUserStatus(userId, Status.BLOCKED);
+			throw new BankingException(
+					"User blocked for exceeding TPin attempts " + ": Contact nearby BOB authority to regain access");
 		} catch (PersistenceException exception) {
-			logger.log(Level.SEVERE, "Couldn't fetch pin");
-			throw new BankingException("Couldn't fetch pin");
+			logger.log(Level.SEVERE, "Error in validating TPin", exception);
+			throw new BankingException("Something went wrong... Try Again Later");
 		}
 	}
 
-	static String hashPassword(String plainPassword) {
-		String salt = BCrypt.gensalt();
-		return BCrypt.hashpw(plainPassword, salt);
+	/**
+	 * @param customerId
+	 * @return Returns the TPin of the given customer ID
+	 * @throws BankingException
+	 */
+	private static String getTPin(long customerId) throws PersistenceException {
+		return cusAgent.getPin(customerId);
 	}
 
-	private static void setAttempt(long userId, int attempt) throws BankingException {
+	/**
+	 * @param password
+	 * @return Returns the hashed string using blowfish algorithm
+	 */
+	static String hashPassword(String password) {
+		String salt = BCrypt.gensalt();
+		return BCrypt.hashpw(password, salt);
+	}
+
+	/**
+	 * @param userId
+	 * @param attempt
+	 * @throws BankingException
+	 * 
+	 */
+	private static void setLoginAttempts(long userId, int attempt) {
 		try {
 			userAgent.setAttempt(userId, attempt);
 		} catch (PersistenceException exception) {
-			logger.log(Level.SEVERE, "Error in updating failed attempts", exception);
-			throw new BankingException("Login Attempt update error", exception);
+			logger.log(Level.SEVERE, "Error in updating login attempts", exception);
 		}
 	}
 
-	private static void setTpinAttempt(long userId, int attempt) throws BankingException {
+	private static void setTPinAttempt(long userId, int attempt) {
 		try {
-			cusAgent.setTpinAttempts(userId, attempt);
+			cusAgent.setTPinAttempts(userId, attempt);
 		} catch (PersistenceException exception) {
-			logger.log(Level.SEVERE, "Error in updating failed tpin attempts", exception);
-			throw new BankingException("Tpin Attempt update error", exception);
+			logger.log(Level.SEVERE, "Error in updating incorrect TPin attempts", exception);
 		}
 	}
 
-	public static void setStatus(long uId, Status status) throws BankingException {
+	public static void setUserStatus(long userId, Status status) throws BankingException {
 		try {
-			validateUserPresence(uId);
-			int presentState = userAgent.getStatus(uId);
+			isUserPresent(userId);
+			int presentState = userAgent.getStatus(userId);
 			int state = status.getState();
 			if (presentState == state) {
 				throw new BankingException("User already " + state);
 			}
-			userAgent.setStatus(uId, status);
+			userAgent.setStatus(userId, status);
 			if (presentState == 3 && state == 1) {
-				setAttempt(uId, 1);
-				setTpinAttempt(uId, 1);
+				setLoginAttempts(userId, 1);
+				setTPinAttempt(userId, 1);
 			}
-			proCache.remove(uId);
 		} catch (PersistenceException exception) {
 			logger.log(Level.SEVERE, "Error in setting user status", exception);
 			exception.printStackTrace();
@@ -142,115 +179,129 @@ public class AuthServices {
 
 	static void setAccountStatus(long accNum, Status status) throws BankingException {
 		try {
-			validateAccountPresence(accNum);
+			isAccountPresent(accNum);
 			int state = status.getState();
 			if (accAgent.getAccStatus(accNum) == state) {
 				throw new BankingException("User already " + state);
 			}
 			accAgent.setAccStatus(accNum, status);
-			accCache.remove(accNum);
 		} catch (PersistenceException exception) {
 			logger.log(Level.SEVERE, "Error in setting account status", exception);
 			throw new BankingException("Status Update Error", exception);
 		}
 	}
 
-	static void validateUserPresence(long userId) throws BankingException {
+	public static boolean isValidUser(long userId) throws BankingException {
 		try {
-			boolean isValidUser = userAgent.isUserPresent(userId);
-			if (!isValidUser) {
-				throw new BankingException("Invalid User ID");
-			}
-		} catch (PersistenceException exception) {
-			logger.log(Level.SEVERE, "Error in validating user", exception);
-			throw new BankingException("Couldn't validate user");
-		}
-	}
-
-	static void validateUser(long userId) throws BankingException {
-		try {
-			validateUserPresence(userId);
 			int status = userAgent.getStatus(userId);
-			if (!(status == 1)) {
-				throw new BankingException("User Blocked/Inactive");
+			if (status == 1) {
+				return true;
 			}
+			throw new InactiveUserException("User state : " + Status.getStatusByState(status));
 		} catch (PersistenceException exception) {
-			logger.log(Level.SEVERE, "Couldn't validate user", exception);
-			throw new BankingException("Couldn't validate user");
+			logger.log(Level.SEVERE, "Error in validating user status", exception);
+			throw new BankingException("Something went wrong... Try again later");
 		}
 	}
 
-	static void validateAccountPresence(long accNum) throws BankingException {
+	static boolean isUserPresent(long userId) throws BankingException {
 		try {
-			boolean isValid = accAgent.isAccountPresent(accNum);
-			if (!isValid) {
-				throw new BankingException("Invalid account number");
+			boolean validUser = userAgent.isUserPresent(userId);
+			if (validUser) {
+				return true;
 			}
+			throw new InvalidUserException("User doesn't exist");
 		} catch (PersistenceException exception) {
-			logger.log(Level.SEVERE, "Error in validating account", exception);
-			throw new BankingException("Couldn't validate account");
+			logger.log(Level.SEVERE, "Error in validating user persence", exception);
+			throw new BankingException("Something went wrong... Try again later");
 		}
 	}
 
-	static void validateAccount(long accNum) throws BankingException {
+	static boolean isAccountPresent(long accountNum) throws BankingException {
 		try {
-			validateAccountPresence(accNum);
-			int status = accAgent.getAccStatus(accNum);
-			if (!(status == 1)) {
-				throw new BankingException("Account Blocked/Inactive");
+			boolean validAccount = accAgent.isAccountPresent(accountNum);
+			if (validAccount) {
+				return true;
 			}
+			throw new InvalidAccountException("Account doesn't exist");
 		} catch (PersistenceException exception) {
-			logger.log(Level.SEVERE, "Couldn't validate account", exception);
-			throw new BankingException("Couldn't validate account", exception);
+			logger.log(Level.SEVERE, "Error in validating account presence", exception);
+			throw new BankingException("Something went wrong... Try again later");
 		}
 	}
 
-	public Object getServiceObj(long userId) throws BankingException {
+	public static boolean isValidAccount(long accountNum) throws BankingException {
 		try {
-			int type = userAgent.getUserLevel(userId);
-			if (type == 1) {
+			int status = accAgent.getAccStatus(accountNum);
+			if (status == 1) {
+				return true;
+			}
+			throw new InactiveAccountException(
+					"Account ( " + accountNum + ") state : " + Status.getStatusByState(status));
+		} catch (PersistenceException exception) {
+			logger.log(Level.SEVERE, "Error in validating account presence", exception);
+			throw new BankingException("Something went wrong... Try again later", exception);
+		}
+	}
+
+	public Object getServiceObject(long userId) throws BankingException {
+		try {
+			int level = userAgent.getUserLevel(userId);
+			if (level == 1) {
 				CustomerServices cus = new CustomerServices();
 				cus.setUserId(userId);
-				String pin = getPin(userId);
+				String pin = getTPin(userId);
 				if (!(pin == null)) {
 					cus.setPinSet(true);
 				}
-				long accNumber = accAgent.getPrimaryAcc(userId);
-				cus.setCurrentAccount(accCache.get(accNumber));
+				cus.setPrimaryAcc(accAgent.getPrimaryAcc(userId));
+//				System.out.println(accAgent.getPrimaryAcc(userId));
 				return cus;
-			} else if (type == 2) {
+			} else if (level == 2) {
 				EmployeeServices emp = new EmployeeServices();
 				emp.setUserId(userId);
 				emp.setBranchId(empAgent.getBranchId(userId));
 				return emp;
-			} else if (type == 3) {
+			} else if (level == 3) {
 				AdminServices admin = new AdminServices();
 				admin.setUserId(userId);
 				return admin;
 			} else {
-				logger.log(Level.SEVERE, "Couldn't determine authorization level");
-				throw new BankingException("Couldn't authorize user");
+				logger.log(Level.SEVERE, "Couldn't determine user level");
+				throw new BankingException("Something went wrong... Try again later");
 			}
-		}
-		 catch (PersistenceException exception) {
+		} catch (PersistenceException exception) {
 			logger.log(Level.SEVERE, "Error in determining user type", exception);
-			throw new BankingException("Cannot fetch available services at the moment... Try again");
+			throw new BankingException("Something went wrong... Try again later");
 		}
 	}
 
-	static boolean validateCustomer(long cusId) throws BankingException {
+	public static boolean isCustomer(long customerId) throws BankingException {
 		try {
-			boolean isValid = cusAgent.isCustomerPresent(cusId);
+			boolean isValid = cusAgent.isCustomerPresent(customerId);
 			if (!isValid) {
-				throw new BankingException("Invalid Customer Id");
+				return false;
 			}
 			return true;
 		} catch (PersistenceException exception) {
-			logger.log(Level.SEVERE, "Couldn't validate customer", exception);
-			throw new BankingException("Cannot validate customer");
+			logger.log(Level.SEVERE, "Error while validating customer", exception);
+			throw new BankingException("Something went wrong... Try again later");
 		}
 	}
 	
+	public static boolean isAlreadyUser(long aadharNumber) throws BankingException {
+		try {
+			boolean isUser = userAgent.isAlreadyUser(aadharNumber);
+			if(isUser) {
+				throw new BankingException("User with aadhar number " + aadharNumber + " already exists");
+			}
+			return false;
+		} catch (PersistenceException exception) {
+			logger.log(Level.SEVERE, "Error in determining user type", exception);
+			throw new BankingException("Something went wrong... Try again later");
+		}
+	}
+
 	private void log(String eventName, Long userId, String description) {
 		Event event = new Event();
 		event.setUserId(userId);
@@ -259,5 +310,18 @@ public class AuthServices {
 		event.setDescription(description);
 		event.setTime(TimeUtil.getTime());
 		EventLogger.log(event);
+	}
+
+	public static boolean isAlreadyCustomer(String panNum) throws BankingException {
+		try {
+			boolean isUser = cusAgent.isAlreadyCustomer(panNum);
+			if(isUser) {
+				throw new BankingException("Customer with PAN number " + panNum + " already exists");
+			}
+			return false;
+		} catch (PersistenceException exception) {
+			logger.log(Level.SEVERE, "Error in determining user type", exception);
+			throw new BankingException("Something went wrong... Try again later");
+		}
 	}
 }
