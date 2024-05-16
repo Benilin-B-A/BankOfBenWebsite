@@ -162,7 +162,7 @@
 								
 								<td>
 								
-								<%
+								<%if (user instanceof AdminServices){
 							if(status == 1){%>
 								<form action="setStatus" method="post">
 									<input type="hidden" name="iD" value="<%=customer.get("ID")%>">
@@ -175,7 +175,7 @@
 									<input type="hidden" name="action" value="activate">
 									<button type="submit" class="button-2">Activate</button>
 								</form>
-							<%} %>	
+							<%} }%>	
 								
 								</td>
 								</tr>
@@ -254,7 +254,7 @@
 										pattern="^[7-9]{1}[0-9]{9}$" title="Enter valid Phone number"/></td>
 
 									<td class="font3">E-Mail</td>
-									<td class="font2"><input placeholder="xxx@yyy.com" type="email" name="eMail" required/></td>
+									<td class="font2"><input placeholder="xxx@yyy.com" type="email" maxlength="20" name="eMail" required/></td>
 								</tr>
 															
 								<tr>
@@ -289,7 +289,7 @@
 										pattern="^[0-9]{12}$" title="Enter valid Aadhar Number" required></td>
 
 									<td class="font3" style="width:40%">Pan Number</td>
-									<td class="font2" style="width:40%"><input placeholder="XXXXXYYYY" type="text" name="panNumber" 
+									<td class="font2" style="width:40%"><input placeholder="XXXXXYYYYX" type="text" name="panNumber" 
 									pattern="^[A-Z]{5}[0-9]{4}[A-Z]$" title="Enter valid PAN number" required/></td>
 								</tr>
 															

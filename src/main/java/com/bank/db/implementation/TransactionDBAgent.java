@@ -42,7 +42,7 @@ public class TransactionDBAgent implements TransactionAgent {
 				PreparedStatement st = connection.prepareStatement(TransactionTableQuery.transfer)) {
 			st.setLong(1, trans.getCustomerId());
 			st.setLong(2, trans.getTransactionId());
-			st.setLong(3, trans.getAccNumber());
+			st.setLong(3, trans.getAccountNumber());
 			st.setLong(4, trans.getAmount());
 			st.setString(5, trans.getType());
 			st.setLong(6, trans.getTransAccNum());

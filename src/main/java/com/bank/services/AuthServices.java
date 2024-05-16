@@ -1,6 +1,5 @@
 package com.bank.services;
 
-import java.nio.channels.SelectableChannel;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -13,6 +12,7 @@ import com.bank.exceptions.BankingException;
 import com.bank.exceptions.InactiveAccountException;
 import com.bank.exceptions.InactiveUserException;
 import com.bank.exceptions.InvalidAccountException;
+import com.bank.exceptions.InvalidInputException;
 import com.bank.exceptions.InvalidUserException;
 import com.bank.exceptions.PersistenceException;
 import com.bank.interfaces.AccountsAgent;
@@ -23,6 +23,7 @@ import com.bank.persistence.util.PersistenceObj;
 import com.bank.pojo.Event;
 import com.bank.util.LogHandler;
 import com.bank.util.TimeUtil;
+import com.bank.util.Validator;
 
 public class AuthServices {
 
@@ -43,6 +44,12 @@ public class AuthServices {
 	 * @throws BankingException
 	 */
 	public boolean login(long userId, String password) throws BankingException {
+		try {
+			Validator.validateUserID(String.valueOf(userId));
+			Validator.checkNull(password, "Password cannot be null");
+		}catch(InvalidInputException exception) {
+			throw new BankingException(exception.getMessage());
+		}
 		try {
 			isUserPresent(userId);
 			int attempt = userAgent.getAttempt(userId);
@@ -197,7 +204,7 @@ public class AuthServices {
 			if (status == 1) {
 				return true;
 			}
-			throw new InactiveUserException("User state : " + Status.getStatusByState(status));
+			throw new InactiveUserException("User " + userId + " State : " + Status.getStatusByState(status));
 		} catch (PersistenceException exception) {
 			logger.log(Level.SEVERE, "Error in validating user status", exception);
 			throw new BankingException("Something went wrong... Try again later");
@@ -223,7 +230,7 @@ public class AuthServices {
 			if (validAccount) {
 				return true;
 			}
-			throw new InvalidAccountException("Account doesn't exist");
+			throw new InvalidAccountException("Account number " + accountNum + " doesn't exist");
 		} catch (PersistenceException exception) {
 			logger.log(Level.SEVERE, "Error in validating account presence", exception);
 			throw new BankingException("Something went wrong... Try again later");
@@ -237,7 +244,7 @@ public class AuthServices {
 				return true;
 			}
 			throw new InactiveAccountException(
-					"Account ( " + accountNum + ") state : " + Status.getStatusByState(status));
+					"Account Number " + accountNum + " State : " + Status.getStatusByState(status));
 		} catch (PersistenceException exception) {
 			logger.log(Level.SEVERE, "Error in validating account presence", exception);
 			throw new BankingException("Something went wrong... Try again later", exception);

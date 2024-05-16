@@ -61,7 +61,7 @@ public class AdminServices {
 
 	public void transfer(Transaction trans, long accNum, boolean withinBank) throws BankingException {
 		AuthServices.isValidAccount(accNum);
-		trans.setAccNumber(accNum);
+		trans.setAccountNumber(accNum);
 		trans.setCreatedBy(this.userId);
 		UserServices.transferMoney(trans, withinBank);
 		String str = null;

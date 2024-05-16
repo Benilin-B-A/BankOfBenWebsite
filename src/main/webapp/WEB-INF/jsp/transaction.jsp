@@ -98,7 +98,7 @@
 
 				<div>
 			
-					<input placeholder="Amount" type="number" name="amount" required
+					<input placeholder="Amount" type="text" name="amount" required
 							pattern= "^[1-9]{1}[0-9]{0,15}$" title="Enter valid amount"/> <br>
 					<br>
 			
@@ -270,22 +270,24 @@
 		
 	</div>
 	
-	<%String msg = (String) request.getAttribute("successMessage");
+	<%String msg = (String) request.getSession().getAttribute("successMessage");
 		if( msg != null) {%>
 				
 	<div class="messageContainer">
 		<p class="successMessage" id="msg"><%=msg%></p>
 	</div>
 	
-	<%}
-	String message = (String) request.getAttribute("errorMessage");
+	<%
+	}
+	String message = (String) request.getSession().getAttribute("errorMessage");
 		if( message != null) {%>
 				
 	<div class="messageContainer">
 		<p class="errorMessage" id="msg"><%=message%></p>
 	</div>
 	
-	<%}	%>
+	<%
+	}%>
 	
 	</div>
 

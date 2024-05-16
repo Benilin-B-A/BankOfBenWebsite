@@ -65,7 +65,7 @@ public abstract class UserServices {
 	static void withdraw(long accNum, long amount, long empID) throws BankingException {
 		AuthServices.isValidAccount(accNum);
 		Transaction trans = new Transaction();
-		trans.setAccNumber(accNum);
+		trans.setAccountNumber(accNum);
 		trans.setCreatedBy(empID);
 		trans.setAmount(amount);
 		trans.setDescription("Withdrawl");
@@ -74,10 +74,10 @@ public abstract class UserServices {
 	}
 
 	private static void withdraw(Transaction trans) throws BankingException {
-		long bal = getBalance(trans.getAccNumber());
+		long bal = getBalance(trans.getAccountNumber());
 		long amount = trans.getAmount();
 		validateBal(bal, amount);
-		trans.setCustomerId(getCustomerId(trans.getAccNumber()));
+		trans.setCustomerId(getCustomerId(trans.getAccountNumber()));
 		trans.setType("Debit");
 		trans.setOpeningBal(bal);
 		trans.setClosingBal(bal - amount);
@@ -87,9 +87,9 @@ public abstract class UserServices {
 	static void deposit(long accNum, long amount, long empId) throws BankingException {
 		AuthServices.isValidAccount(accNum);
 		Transaction trans = new Transaction();
-		trans.setAccNumber(accNum);
+		trans.setAccountNumber(accNum);
 		trans.setCreatedBy(empId);
-		trans.setCustomerId(getCustomerId(trans.getAccNumber()));
+		trans.setCustomerId(getCustomerId(trans.getAccountNumber()));
 		trans.setDescription("Deposit");
 		trans.setTransactionId(System.currentTimeMillis());
 		trans.setAmount(amount);
@@ -97,7 +97,7 @@ public abstract class UserServices {
 	}
 
 	private static void deposit(Transaction trans) throws BankingException {
-		long bal = getBalance(trans.getAccNumber());
+		long bal = getBalance(trans.getAccountNumber());
 		long amount = trans.getAmount();
 		trans.setType("Credit");
 		trans.setOpeningBal(bal);
@@ -122,7 +122,7 @@ public abstract class UserServices {
 		} catch (InvalidInputException exception) {
 			throw new BankingException("Transaction is null");
 		}
-		long senderAccNum = trans.getAccNumber();
+		long senderAccNum = trans.getAccountNumber();
 		long tId = TimeUtil.getTime();
 		trans.setTransactionId(tId);
 		Transaction recepient = null;
@@ -131,10 +131,11 @@ public abstract class UserServices {
 			if (accNum == senderAccNum) {
 				throw new BankingException("Cannot transfer money to the same account");
 			}
+			AuthServices.isAccountPresent(accNum);
 			AuthServices.isValidAccount(accNum);
 			recepient = new Transaction();
 			recepient.setCustomerId(getCustomerId(accNum));
-			recepient.setAccNumber(accNum);
+			recepient.setAccountNumber(accNum);
 			recepient.setTransAccNum(senderAccNum);
 			recepient.setDescription(trans.getDescription());
 			recepient.setAmount(trans.getAmount());
@@ -196,9 +197,7 @@ public abstract class UserServices {
 
 	static JSONObject getAccountStatement(long accNum, int page) throws BankingException {
 		try {
-			if (AuthServices.isAccountPresent(accNum)) {
-				AuthServices.isValidAccount(accNum);
-			}
+			AuthServices.isAccountPresent(accNum);
 			int limit = 10;
 			int offset = limit * (page - 1);
 			return tranAgent.getAccountStatement(accNum, limit, offset);

@@ -35,14 +35,6 @@ public class Transaction {
 		return description;
 	}
 
-	public long getAccNumber() {
-		return accountNumber;
-	}
-
-	public void setAccNumber(long accNumber) {
-		this.accountNumber = accNumber;
-	}
-
 	public long getTransAccNum() {
 		return transactionAccountNumber;
 	}

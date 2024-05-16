@@ -83,10 +83,12 @@
 						<%List<Long> list = (List<Long>) request.getAttribute("accList");
 							for(int i=0;i<list.size();i++){
 								Long accountNum = list.get(i);
-							if(accountNum == request.getAttribute("accNum")){%>
+								Long accLong = (Long) request.getAttribute("accNum");
+								if(accLong != null){
+							if(accountNum == accLong){%>
 								
 								<option value="<%=accountNum%>" selected><%=accountNum%></option>
-							<%}else{ %>
+							<%}}else{ %>
 							
   				 	 		<option value="<%=accountNum%>"><%=accountNum%></option>
     					
@@ -100,8 +102,6 @@
 		<br>
 	
 	<% } else {%>
-	
-	<br>
 	
 	<p class="font2">Account Number : <%=accNum%></p>
 	

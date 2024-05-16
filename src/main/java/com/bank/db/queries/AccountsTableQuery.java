@@ -13,7 +13,7 @@ public class AccountsTableQuery {
 	public static String changePrimaryAccount = "update Accounts set IS_PRIMARY = case when ACC_NUMBER = ? then"
 			+ " 1 when ACC_NUMBER = ? then 0 else IS_PRIMARY end;";
 
-	public static String getAccountDetails = "select CUSTOMER_ID,ACC_NUMBER,BALANCE,ACCOUNT_TYPE,NAME,OPENED_ON,ACC_STATUS from Accounts "
+	public static String getAccountDetails = "select CUSTOMER_ID,ACC_NUMBER,BALANCE,ACCOUNT_TYPE,NAME,OPENED_ON,ACC_STATUS,Branch.ID from Accounts "
 			+ "inner join Branch on Accounts.BRANCH_ID = Branch.ID where ACC_NUMBER = ?";
 
 	public static String getCustomerAccounts = "select * from Accounts where CUSTOMER_ID = ? ";

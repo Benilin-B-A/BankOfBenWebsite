@@ -33,6 +33,10 @@ public class EmployeeServices {
 		this.userId = userId;
 	}
 
+	public long getBranchId() {
+		return branchId;
+	}
+
 	public void setBranchId(long branchId) {
 		this.branchId = branchId;
 	}
@@ -43,6 +47,10 @@ public class EmployeeServices {
 
 	private static Logger logger = LogHandler.getLogger(CustomerServices.class.getName(), "EmployeeServices.txt");
 
+	public JSONObject getAccounts(long customerId) throws BankingException {
+		return UserServices.getAccounts(customerId);
+	}
+	
 	private boolean validateEmpAccess(long accNum) throws BankingException {
 		try {
 			AuthServices.isAccountPresent(accNum);
@@ -58,25 +66,21 @@ public class EmployeeServices {
 	}
 
 	public long getBalance(long accNum) throws BankingException {
-		validateEmpAccess(accNum);
 		return UserServices.getBalance(accNum);
 	}
 
 	public void withdraw(long accNum, long amount) throws BankingException {
-		validateEmpAccess(accNum);
 		UserServices.withdraw(accNum, amount, this.userId);
 		log("Withdraw", UserServices.getCustomerId(accNum), "Money withdrawn from bank");
 	}
 
 	public void deposit(long accNum, long amount) throws BankingException {
-		validateEmpAccess(accNum);
 		UserServices.deposit(accNum, amount, this.userId);
 		log("Deposit", UserServices.getCustomerId(accNum), "Money deposited in bank");
 	}
 
 	public void transfer(Transaction trans, long accNum, boolean withinBank) throws BankingException {
-		validateEmpAccess(accNum);
-		trans.setAccNumber(accNum);
+		trans.setAccountNumber(accNum);
 		trans.setCreatedBy(this.userId);
 		UserServices.transferMoney(trans, withinBank);
 		String str = null;
@@ -99,25 +103,14 @@ public class EmployeeServices {
 	}
 
 	public JSONObject getAccountStatement(long accNum, int page) throws BankingException {
-		validateEmpAccess(accNum);
 		return UserServices.getAccountStatement(accNum, page);
 	}
 
 	public JSONObject getTransStatement(long transId) throws BankingException {
-		try {
-			long branchId = tranAgent.getTransactionBranch(transId);
-			if (branchId == empAgent.getBranchId(userId)) {
-				return UserServices.getTransStatement(transId);
-			}
-			throw new BankingException("Employee doesn't have access to this transaction");
-		} catch (PersistenceException exception) {
-			logger.log(Level.SEVERE, "Cannot get transaction branch");
-			throw new BankingException("Couldn't fetch transaction statement");
-		}
+		return UserServices.getTransStatement(transId);
 	}
 
 	public JSONObject getAccount(long accNum) throws BankingException {
-		validateEmpAccess(accNum);
 		return UserServices.getAccountDetails(accNum);
 	}
 

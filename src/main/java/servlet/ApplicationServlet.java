@@ -6,6 +6,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.json.JSONObject;
 
@@ -111,6 +112,7 @@ public class ApplicationServlet extends HttpServlet {
 					request.getRequestDispatcher("/WEB-INF/jsp/setPin.jsp").forward(request, response);
 				}
 			}
+			checkMessage(request);
 			String tab = request.getParameter("transactionType");
 			if (tab == null || tab.equals("withinBank")) {
 				if (serviceObj instanceof CustomerServices) {
@@ -200,31 +202,11 @@ public class ApplicationServlet extends HttpServlet {
 
 		case "/accountDetails":
 			getAccountDetails(request);
+//			EmployeeServices user = (EmployeeServices) request.getSession().getAttribute("user");
+//			System.out.println( String.valueOf(((EmployeeServices) user).getBranchId()));
+//			System.out.println(request.getAttribute("allAccounts"));
 			request.setAttribute("tab", "viewAccount");
 			request.getRequestDispatcher("/WEB-INF/jsp/accounts.jsp").forward(request, response);
-			break;
-
-		case "/setAccStatus":
-			Long accNum = Long.parseLong(request.getParameter("iD"));
-			Status accState;
-			String act = request.getParameter("action");
-			if (act.equals("activate")) {
-				accState = Status.ACTIVE;
-			} else {
-				accState = Status.INACTIVE;
-			}
-			Object object = request.getSession().getAttribute("user");
-			try {
-				if (object instanceof AdminServices) {
-					((AdminServices) object).setAccountStatus(accNum, accState);
-				} else {
-					((EmployeeServices) object).setAccountStatus(accNum, accState);
-				}
-			} catch (BankingException exception) {
-				// hanlde--------------------------------------------------
-			}
-			request.getSession().setAttribute("accNum", accNum);
-			response.sendRedirect(request.getContextPath() + "/app/accountDetails");
 			break;
 
 		case "/createAccount":
@@ -241,6 +223,25 @@ public class ApplicationServlet extends HttpServlet {
 			break;
 		}
 
+	}
+
+	private void checkMessage(HttpServletRequest request) {
+		HttpSession session = request.getSession();
+		String successMsg = (String) session.getAttribute("successMessage");
+		String errorMsg = (String) session.getAttribute("errorMessage");
+		String firstRound = (String) session.getAttribute("firstRound");
+		if (firstRound != null) {
+			if (successMsg != null) {
+				session.removeAttribute("successMessage");
+			} else {
+				session.removeAttribute("errorMessage");
+			}
+			session.removeAttribute("firstRound");
+			return;
+		} else if (successMsg != null || errorMsg != null) {
+			session.setAttribute("firstRound", "firstRound");
+			return;
+		}
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -262,8 +263,8 @@ public class ApplicationServlet extends HttpServlet {
 
 		// change T-PIN for customers
 		case "/changePIN":
-			String oldPIN = (String) request.getParameter("oldPIN");
-			String newPIN = (String) request.getParameter("newPIN");
+			String oldPIN = (String) request.getParameter("oldPin");
+			String newPIN = (String) request.getParameter("newPin");
 			try {
 				CustomerServices cusService = (CustomerServices) getUserObject(request);
 				cusService.changePin(oldPIN, newPIN);
@@ -311,21 +312,46 @@ public class ApplicationServlet extends HttpServlet {
 				} else {
 					sendMoney(request, false);
 				}
-				request.setAttribute("successMessage", "Transaction successful");
+				request.getSession().setAttribute("successMessage", "Transaction successful");
 			} catch (BankingException | InvalidInputException exception) {
-				request.setAttribute("errorMessage", exception.getMessage());
+				request.getSession().setAttribute("errorMessage", exception.getMessage());
 			} finally {
 				Object serv = getUserObject(request);
 				if (serv instanceof CustomerServices) {
 					setAllAccounts(request, ((CustomerServices) serv));
 				}
 				if (request.getParameter("type").equals("within")) {
-					request.setAttribute("type", "within");
+					request.getSession().setAttribute("redirect", "yes");
+					response.sendRedirect(request.getContextPath() + "/app/transaction?transactionType=withinBank");
 				} else {
-					request.setAttribute("type", "outside");
+					request.getSession().setAttribute("redirect", "yes");
+					response.sendRedirect(request.getContextPath() + "/app/transaction?transactionType=toOtherBank");
 				}
-				request.getRequestDispatcher("/WEB-INF/jsp/transaction.jsp").forward(request, response);
 			}
+			break;
+
+		case "/setAccStatus":
+			Long accNum = Long.parseLong(request.getParameter("iD"));
+			Status accState;
+			String act = request.getParameter("action");
+			if (act.equals("activate")) {
+				accState = Status.ACTIVE;
+			} else {
+				accState = Status.INACTIVE;
+			}
+			Object object = request.getSession().getAttribute("user");
+			try {
+				if (object instanceof AdminServices) {
+					((AdminServices) object).setAccountStatus(accNum, accState);
+				} else {
+					((EmployeeServices) object).setAccountStatus(accNum, accState);
+				}
+			} catch (BankingException exception) {
+				// hanlde--------------------------------------------------
+			}
+			request.getSession().setAttribute("accNum", accNum);
+			request.getSession().setAttribute("redirect", "yes");
+			response.sendRedirect(request.getContextPath() + "/app/accountDetails");
 			break;
 
 		case "/setStatus":
@@ -378,55 +404,73 @@ public class ApplicationServlet extends HttpServlet {
 			break;
 
 		case "/createAccount":
-			Object object = request.getSession().getAttribute("user");
-			Account acc = new Account();
-			acc.setUId(Long.parseLong(request.getParameter("customerID")));
-			AccountType type1;
-			String accType = request.getParameter("accType");
-			if (accType.equals("Current")) {
-				type1 = AccountType.CURRENT;
-			} else {
-				type1 = AccountType.SAVINGS;
-			}
-			acc.setType(type1);
-			long accNum = 0;
 			try {
-				if (object instanceof AdminServices) {
-					Long branchID = Long.parseLong(request.getParameter("branchId"));
-					accNum = ((AdminServices) object).addAccount(acc, branchID);
+				Object obj = request.getSession().getAttribute("user");
+				Account acc = new Account();
+				String customerID = request.getParameter("customerID");
+				Validator.validateUserID(customerID);
+				acc.setUId(Long.parseLong(customerID));
+				AccountType type1;
+				String accType = request.getParameter("accType");
+				Validator.checkNull(accType, "Account type cannot be null");
+				if (accType.equals("Current")) {
+					type1 = AccountType.CURRENT;
+				} else if (accType.equals("Savings")) {
+					type1 = AccountType.SAVINGS;
 				} else {
-					accNum = ((EmployeeServices) object).addAccount(acc);
+					throw new BankingException("Invalid Account type");
+				}
+				acc.setType(type1);
+				long accoNum = 0;
+
+				if (obj instanceof AdminServices) {
+					String brID = request.getParameter("branchId");
+					Validator.validateBranchID(brID);
+					Long branchID = Long.parseLong(brID);
+					accoNum = ((AdminServices) obj).addAccount(acc, branchID);
+				} else {
+					accoNum = ((EmployeeServices) obj).addAccount(acc);
 				}
 				request.setAttribute("successMessage", "Account created successfully");
-			} catch (BankingException exception) {
+				request.getSession().setAttribute("accNum", accoNum);
+				request.getSession().setAttribute("redirect", "yes");
+				request.setAttribute("tab", "viewAccount");
+				response.sendRedirect(request.getContextPath() + "/app/accountDetails");
+			} catch (BankingException | InvalidInputException exception) {
+				request.setAttribute("tab", "viewAccount");
 				request.setAttribute("errorMessage", exception.getMessage());
+				request.getRequestDispatcher("/WEB-INF/jsp/accounts.jsp");
 			}
-			request.getSession().setAttribute("accNum", accNum);
-			response.sendRedirect(request.getContextPath() + "/app/accountDetails");
 			break;
 
 		case "/deposit":
-			Object serviceObj = request.getSession().getAttribute("user");
-			Long accountNum = Long.parseLong(request.getParameter("accNumber"));
-			Long amount = Long.parseLong(request.getParameter("amount"));
 			try {
+				Object serviceObj = request.getSession().getAttribute("user");
+				String accNumber = request.getParameter("accNumber");
+				Validator.validateAccount(accNumber);
+				Long accountNumber = Long.parseLong(accNumber);
+				String amt = request.getParameter("amount");
+				Validator.validateAmount(amt);
+				Long amount = Long.parseLong(amt);
 				if (serviceObj instanceof AdminServices) {
-					((AdminServices) serviceObj).deposit(accountNum, amount);
+					((AdminServices) serviceObj).deposit(accountNumber, amount);
 				} else {
-					((EmployeeServices) serviceObj).deposit(accountNum, amount);
+					((EmployeeServices) serviceObj).deposit(accountNumber, amount);
 				}
-				request.setAttribute("successMessage", "Deposit successful");
-			} catch (BankingException exception) {
-				request.setAttribute("errorMessage", exception.getMessage());
+				request.getSession().setAttribute("successMessage", "Deposit successful");
+			} catch (BankingException | InvalidInputException exception) {
+				request.getSession().setAttribute("errorMessage", exception.getMessage());
 			} finally {
-				request.setAttribute("type", "deposit");
-				request.getRequestDispatcher("/WEB-INF/jsp/transaction.jsp").forward(request, response);
+				request.getSession().setAttribute("redirect", "yes");
+				response.sendRedirect(request.getContextPath() + "/app/transaction?transactionType=deposit");
+//				request.setAttribute("type", "deposit");
+//				request.getRequestDispatcher("/WEB-INF/jsp/transaction.jsp").forward(request, response);
 			}
 			break;
 
-		case "/updateCustomer":
-
-			break;
+//		case "/updateCustomer":
+//
+//			break;
 
 		case "/addEmployee":
 			try {
@@ -446,21 +490,28 @@ public class ApplicationServlet extends HttpServlet {
 //			break;
 
 		case "/withdraw":
-			Object servObj = request.getSession().getAttribute("user");
-			Long accountNumber = Long.parseLong(request.getParameter("accNumber"));
-			Long amt = Long.parseLong(request.getParameter("amount"));
 			try {
+				Object servObj = request.getSession().getAttribute("user");
+				String acc = request.getParameter("accNumber");
+				Validator.validateAccount(acc);
+				Long accountNum = Long.parseLong(acc);
+				String withdrawAmount = request.getParameter("amount");
+				Validator.validateAmount(withdrawAmount);
+				Long wAmount = Long.parseLong(withdrawAmount);
+
 				if (servObj instanceof AdminServices) {
-					((AdminServices) servObj).withdraw(accountNumber, amt);
+					((AdminServices) servObj).withdraw(accountNum, wAmount);
 				} else {
-					((EmployeeServices) servObj).withdraw(accountNumber, amt);
+					((EmployeeServices) servObj).withdraw(accountNum, wAmount);
 				}
-				request.setAttribute("successMessage", "Withdrawl successful");
-			} catch (BankingException exception) {
-				request.setAttribute("errorMessage", exception.getMessage());
+				request.getSession().setAttribute("successMessage", "Withdrawl successful");
+			} catch (BankingException | InvalidInputException exception) {
+				request.getSession().setAttribute("errorMessage", exception.getMessage());
 			} finally {
-				request.setAttribute("type", "withdraw");
-				request.getRequestDispatcher("/WEB-INF/jsp/transaction.jsp").forward(request, response);
+//				request.setAttribute("type", "withdraw");
+//				request.getRequestDispatcher("/WEB-INF/jsp/transaction.jsp").forward(request, response);
+				request.getSession().setAttribute("redirect", "yes");
+				response.sendRedirect(request.getContextPath() + "/app/transaction?transactionType=withdraw");
 			}
 			break;
 		}
@@ -474,14 +525,18 @@ public class ApplicationServlet extends HttpServlet {
 		String name = request.getParameter("name") + " " + request.getParameter("lName");
 		Validator.validateName(name);
 		emp.setName(sanitizeInput(name));
-		emp.setDOB(request.getParameter("dOB"));
+		String dOB = request.getParameter("dOB");
+		Validator.validateEmployeeDOB(dOB);
+		emp.setDOB(dOB);
 		String phone = request.getParameter("phone");
 		Validator.validateMobile(phone);
 		emp.setPhone(Long.parseLong(phone));
 		String mail = request.getParameter("eMail");
 		Validator.validateMail(mail);
 		emp.setMail(mail);
-		emp.setGender(request.getParameter("gender"));
+		String genderString = request.getParameter("gender");
+		Validator.validateGender(genderString);
+		emp.setGender(genderString);
 		String address = request.getParameter("addressL1") + "," + request.getParameter("addressL2") + ",";
 		String pinCode = request.getParameter("pincode");
 		Validator.validateAddress(address);
@@ -525,7 +580,9 @@ public class ApplicationServlet extends HttpServlet {
 					accountNum = Long.parseLong(account);
 					request.setAttribute("accNum", accountNum);
 				} else if (acc != null) {
+					Validator.validateAccount(acc);
 					accountNum = Long.parseLong(acc);
+					request.setAttribute("accNum", accountNum);
 				} else {
 					accountNum = ((CustomerServices) servObj).getAccNum();
 				}
@@ -642,36 +699,40 @@ public class ApplicationServlet extends HttpServlet {
 	}
 
 	private void getAccountDetails(HttpServletRequest request) {
-		Long accountNum = null;
-		Object newAccNum = request.getSession().getAttribute("accNum");
-		if (newAccNum != null) {
-			accountNum = (Long) newAccNum;
-			request.getSession().removeAttribute("accNum");
-		}
-		String typeValue = request.getParameter("value");
-		Object userObj = request.getSession().getAttribute("user");
-		if (typeValue != null) {
-			Long value = Long.parseLong(typeValue);
-			if (userObj instanceof AdminServices) {
+		try {
+			Long accountNum = null;
+			Object newAccNum = request.getSession().getAttribute("accNum");
+			if (newAccNum != null) {
+				accountNum = (Long) newAccNum;
+				request.getSession().removeAttribute("accNum");
+			}
+			String typeValue = request.getParameter("value");
+			Object userObj = request.getSession().getAttribute("user");
+			if (typeValue != null) {
+				Long value = Long.parseLong(typeValue);
 				String type = request.getParameter("type");
+				Validator.checkNull(type, "Search category cannot be null");
 				if (type.equals("customerID")) {
 					JSONObject accList;
 					try {
-						accList = ((AdminServices) userObj).getAccounts(value);
+						if (userObj instanceof AdminServices) {
+							accList = ((AdminServices) userObj).getAccounts(value);
+						} else {
+							accList = ((EmployeeServices) userObj).getAccounts(value);
+						}
 						request.setAttribute("customerID", value);
 						request.setAttribute("allAccounts", accList);
 					} catch (BankingException exception) {
 						request.setAttribute("errorMessage", exception.getMessage());
 					}
-				} else {
+				} else if (type.equals("accountNumber")) {
 					accountNum = value;
+				} else {
+					throw new BankingException("Invalid search category");
 				}
-			} else {
-				accountNum = value;
 			}
-		}
-		if (accountNum != null) {
-			try {
+			if (accountNum != null) {
+
 				if (userObj instanceof AdminServices) {
 					JSONObject acc = ((AdminServices) userObj).getAccount(accountNum);
 					request.setAttribute("account", acc);
@@ -679,9 +740,10 @@ public class ApplicationServlet extends HttpServlet {
 					JSONObject acc = ((EmployeeServices) userObj).getAccount(accountNum);
 					request.setAttribute("account", acc);
 				}
-			} catch (BankingException exception) {
-				request.setAttribute("errorMessage", exception.getMessage());
+
 			}
+		} catch (BankingException | InvalidInputException exception) {
+			request.setAttribute("errorMessage", exception.getMessage());
 		}
 	}
 
@@ -733,19 +795,23 @@ public class ApplicationServlet extends HttpServlet {
 		String name = request.getParameter("name") + " " + request.getParameter("lName");
 		Validator.validateName(name);
 		cus.setName(sanitizeInput(name));
-		cus.setDOB(request.getParameter("dOB"));
+		String dOB = request.getParameter("dOB");
+		Validator.validateCustomerDOB(dOB);
+		cus.setDOB(dOB);
 		String phoneString = request.getParameter("phone");
 		Validator.validateMobile(phoneString);
 		cus.setPhone(Long.parseLong(phoneString));
 		String mail = request.getParameter("eMail");
 		Validator.validateMail(mail);
 		cus.setMail(sanitizeInput(mail));
-		cus.setGender(request.getParameter("gender"));
+		String genderString = request.getParameter("gender");
+		Validator.validateGender(genderString);
+		cus.setGender(genderString);
 		String address = request.getParameter("addressL1") + "," + request.getParameter("addressL2") + ",";
 		String pinCode = request.getParameter("pincode");
 		Validator.validateAddress(address);
 		Validator.validatePinCode(pinCode);
-		cus.setAddress(sanitizeInput(address+pinCode));
+		cus.setAddress(sanitizeInput(address + pinCode));
 		String aadharNumber = request.getParameter("aadharNumber");
 		Validator.validateAadharNumber(aadharNumber);
 		cus.setAadharNum(Long.parseLong(aadharNumber));
@@ -785,17 +851,17 @@ public class ApplicationServlet extends HttpServlet {
 		String description = request.getParameter("description");
 		Validator.validateDescription(description);
 		transaction.setDescription(sanitizeInput(description));
-		String pin = request.getParameter("tpin");
-		Validator.validatePin(pin);
 		if (!withinBank) {
 			String iFSC = request.getParameter("iFSC");
 			Validator.validateIFSC(iFSC);
 			transaction.setiFSC(iFSC);
 		}
 		if (services instanceof CustomerServices) {
+			String pin = request.getParameter("tpin");
+			Validator.validatePin(pin);
 			String accountNumber = request.getParameter("ownAccNumber");
 			Validator.validateAccount(accountNumber);
-			transaction.setAccNumber(Long.parseLong(accountNumber));
+			transaction.setAccountNumber(Long.parseLong(accountNumber));
 			((CustomerServices) services).transfer(transaction, pin, withinBank);
 		} else {
 			String senderAccountNumber = request.getParameter("senderAccNum");

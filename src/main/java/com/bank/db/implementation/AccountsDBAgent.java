@@ -120,6 +120,7 @@ public class AccountsDBAgent implements AccountsAgent {
 				acc.setBranch(set.getString(5));
 				acc.setOpenedOn(set.getLong(6));
 				acc.setStatus(Status.getStatusByState(set.getInt(7)));
+				acc.setBranchId(set.getLong(8));
 				return acc;
 			}
 		} catch (SQLException exception) {

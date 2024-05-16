@@ -8,7 +8,6 @@ import java.util.logging.Logger;
 
 import org.json.JSONObject;
 
-import com.bank.adapter.JSONAdapter;
 import com.bank.cache.AccountCache;
 import com.bank.cache.CustomerAccountsCache;
 import com.bank.exceptions.BankingException;
@@ -27,16 +26,17 @@ public class CustomerServices {
 
 	private String name;
 	private long userId;
+
 	public long getUserId() {
 		return userId;
 	}
 
 	private boolean isPinSet;
-	
+
 	private long primaryAcc;
-	
+
 //	private Account currentAccount;
-	
+
 	public long getPrimaryAcc() {
 		return primaryAcc;
 	}
@@ -78,12 +78,12 @@ public class CustomerServices {
 	private static Logger logger = LogHandler.getLogger(CustomerServices.class.getName(), "CustomerServices.txt");
 
 	public boolean isPrimary(long accNum) {
-		if(accNum == primaryAcc) {
+		if (accNum == primaryAcc) {
 			return true;
 		}
 		return false;
 	}
-	
+
 //	public void withdraw(long amount, String pin) throws BankingException, InvalidInputException {
 //		AuthServices.isValidPin(userId, pin);
 //		UserServices.withdraw(primaryAcc, amount, this.userId);
@@ -95,44 +95,45 @@ public class CustomerServices {
 //		log("Deposit", this.userId, "Money deposited in bank");
 //	}
 
-	public void transfer(Transaction transaction, String pin, boolean withinBank)
-			throws BankingException{
-		AuthServices.isValidPin(userId, pin);
-		transaction.setCreatedBy(this.userId);
-		UserServices.transferMoney(transaction, withinBank);
-		String str = null;
-		if(withinBank) {
-			str = "Money transfered within bank to account number :";
-		}else {
-			str = "Money transfered  outside bank to account number :";
+	public void transfer(Transaction transaction, String pin, boolean withinBank) throws BankingException {
+		long uId = UserServices.getCustomerId(transaction.getAccountNumber());
+		if (uId == userId) {
+			AuthServices.isValidPin(userId, pin);
+			transaction.setCreatedBy(this.userId);
+			UserServices.transferMoney(transaction, withinBank);
+			String str = null;
+			if (withinBank) {
+				str = "Money transfered within bank to account number :";
+			} else {
+				str = "Money transfered  outside bank to account number :";
+			}
+			log("Money transfer", this.userId,
+					str + "Amount transferd from account number : " + transaction.getAccountNumber());
+			return;
 		}
-		log("Money transfer", this.userId,str + "Amount transferd from account number : " + transaction.getAccNumber());
+		throw new BankingException("Invalid Account Number");
 	}
 
 	public void changePassword(String oldPass, String newPass) throws BankingException {
 		UserServices.changePassword(userId, oldPass, newPass);
-		log("Password changed", this.userId,
-				"Password changed");
+		log("Password changed", this.userId, "Password changed");
 	}
 
-	public void changePin(String oldPin, String newPin)
-			throws BankingException, InvalidInputException {
+	public void changePin(String oldPin, String newPin) throws BankingException, InvalidInputException {
 		AuthServices.isValidPin(userId, oldPin);
 		setPin(newPin);
-		log("T-PIN changed", this.userId,
-				"T-PIN changed");
+		log("T-PIN changed", this.userId, "T-PIN changed");
 	}
 
 	public void setPin(String newPin) throws BankingException, InvalidInputException {
 		try {
 			Validator.validatePin(newPin);
 			cusAgent.setPin(AuthServices.hashPassword(newPin), userId);
-			log("T-PIN set", this.userId,
-					"T-PIN set");
+			log("T-PIN set", this.userId, "T-PIN set");
 			isPinSet = true;
 		} catch (PersistenceException exception) {
 			logger.log(Level.SEVERE, "Couldn't set pin", exception);
-			throw new BankingException("Couldn't set pin", exception);
+			throw new BankingException("Something went wrong... Try again...", exception);
 		}
 	}
 
@@ -141,7 +142,10 @@ public class CustomerServices {
 	}
 
 	public JSONObject getAccountStatement(long accountNum, int page) throws BankingException {
-		return UserServices.getAccountStatement(accountNum, page);
+		if (UserServices.getCustomerId(accountNum) == userId) {
+			return UserServices.getAccountStatement(accountNum, page);
+		}
+		throw new BankingException("Invalid Account Number");
 	}
 
 	public void switchAccount(long accoNum) throws BankingException {
@@ -149,8 +153,7 @@ public class CustomerServices {
 		try {
 			accAgent.switchPrimary(userId, primaryAcc, accoNum);
 			primaryAcc = accoNum;
-			log("Primary account switched", this.userId,
-					"Primary account switched");
+			log("Primary account switched", this.userId, "Primary account switched");
 		} catch (PersistenceException exception) {
 			logger.log(Level.SEVERE, "Error in switching account", exception);
 			throw new BankingException("Couldn't switch account");
@@ -188,16 +191,16 @@ public class CustomerServices {
 			logger.log(Level.SEVERE, "Error in fetching accounts", exception);
 			throw new BankingException("Something went wrong...Try again");
 		}
-		//		return accsCache.get(userId);
+		// return accsCache.get(userId);
 	}
-	
-	public List<Long> getActiveAccounts() throws BankingException{
+
+	public List<Long> getActiveAccounts() throws BankingException {
 		JSONObject accs = UserServices.getAccounts(userId);
 		List<Long> activeAccList = new ArrayList<>();
 		Set<String> keySet = accs.keySet();
-		for(String acc : keySet) {
+		for (String acc : keySet) {
 			int status = accs.getJSONObject(acc).getJSONObject("status").getInt("state");
-			if(status == 1) {
+			if (status == 1) {
 				activeAccList.add(accs.getJSONObject(acc).getLong("accNum"));
 			}
 		}
@@ -214,5 +217,3 @@ public class CustomerServices {
 		EventLogger.log(event);
 	}
 }
-
-
