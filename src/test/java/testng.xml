@@ -1,8 +1,0 @@
-<suite>
-	<test name="Test">
-		<classes>
-			<class name="test.AuthenticationTester" />
-			<class name="test.AdminServiceTester" />
-		</classes>
-	</test>
-</suite>
