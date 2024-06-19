@@ -20,7 +20,7 @@ public class ConnectionHandler {
 			Class.forName("com.mysql.cj.jdbc.Driver");
 		} catch (ClassNotFoundException exception) {
 		}
-		try (FileReader reader = new FileReader("ConnProp")){
+		try (FileReader reader = new FileReader("/home/benilin-21451/Documents/ConnProp")){
 			conProp.load(reader);
 			dataBase = conProp.getProperty("dBMS");
 			serverName = conProp.getProperty("serverName");
